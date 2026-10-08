@@ -33,7 +33,9 @@ missing=sorted(used-parser.ids)
 print("HTML_IDS",len(parser.ids),"JS_IDS",len(used),"MISSING",missing)
 assert len(parser.ids)>20 and len(used)>20 and not missing
 for required in ("countrySelect","scenarioSelect","jurisdictionWarning",
-    "taxBasisHeading","kEquity","comparisonBody","tradeBody","frontierChart"):
+    "taxBasisHeading","kEquity","comparisonBody","tradeBody","frontierChart",
+    "teInput","feeInput","lossInput","futureInput","resetAssumptions","pmHeadline",
+    "pmCostBridge","pmRiskFill","pmAdvantage"):
     assert required in parser.ids
 assert "populate(\"CA\")" in js
 assert "s.currency" in js and "CAD" in js and "USD" in js
@@ -47,7 +49,8 @@ server=ThreadingHTTPServer(("127.0.0.1",0),partial(QuietHandler,directory=str(DO
 thread=Thread(target=server.serve_forever,daemon=True);thread.start()
 try:
     host="http://127.0.0.1:"+str(server.server_port)
-    for route in ("/","/app.js","/styles.css","/data/scenarios.json"):
+    for route in ("/","/app.js","/styles.css","/pm.css",
+                  "/data/scenarios.json","/data/assumption_grid.json"):
         with urllib.request.urlopen(host+route,timeout=8) as reply:
             payload=reply.read()
             assert reply.status==200 and len(payload)>300, route
@@ -60,6 +63,15 @@ try:
     assert ca[0]["tax_lots"][0]["lot_id"]=="ACB-XIC"
     assert any(x["superficial_loss_watch"]["lookback_30d_flagged_tickers"]
                for x in ca)
+    grid=json.loads(urllib.request.urlopen(
+        host+"/data/assumption_grid.json",timeout=8).read())
+    assert len(grid["cases"])==108
+    assert len({x["key"] for x in grid["cases"]})==108
+    assert len([x for x in grid["cases"] if x["country"]=="CA"])==72
+    assert len([x for x in grid["cases"] if x["country"]=="US"])==36
+    assert all(len(x["methods"])==5 for x in grid["cases"])
+    assert any(x["key"]=="CA:0:0.025:10:0.8:0.2" for x in grid["cases"])
+    print("ASSUMPTION_SOLVER_GRID_PASS",len(grid["cases"]))
     print("CA_FIRST_HTTP_DATA_PASS",len(ca),"CASES","US",len(us),"CASES")
 finally:
     server.shutdown();server.server_close()

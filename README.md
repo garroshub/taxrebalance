@@ -1,8 +1,8 @@
 # Tax-Aware Rebalancing Lab
 
-**Portfolio rebalancing under tax, risk, and implementation-cost constraints — using synthetic data only.**
+**Portfolio rebalancing with tax and risk constraints, using simulated accounts.**
 
-This is a research-grade decision-support demonstration, not a trading strategy or tax filing system. Every purchase, account, price, tax rate, covariance, and portfolio is **simulated**. No personal investment or bank data, real brokerage connections, or live market feeds are needed or planned.
+The project compares rebalancing decisions for simulated taxable accounts. It does not place trades or prepare tax returns. Every purchase, account, price, tax rate, covariance, and portfolio is **simulated**. No personal investment records, brokerage connections, or market feeds are used.
 
 ## Two tax jurisdictions
 
@@ -15,7 +15,11 @@ This is a research-grade decision-support demonstration, not a trading strategy 
 | Loss review | Superficial-loss 30-day windows and affiliated-person watch | Simplified wash-sale flags |
 | Presolved scenarios | **6 fictional CAD portfolio cases** | **5 fictional USD cases** |
 
-The default GitHub Pages **Portfolio Manager Decision Desk** lets visitors switch jurisdiction, choose precomputed scenarios, compare methods, inspect actual solved portfolio trades, and view risk–cost frontiers. All **11** scenarios are independently solved by the Python optimizer then exported as static JSON. The browser does not invent optimized results.
+The [GitHub Pages site](https://garroshub.github.io/Quant_Sector_Rotation_Strategy/) opens with the Canadian portfolio. It shows the modeled cost difference against risk-only rebalancing, the tax, fee and risk contributions to that difference, tracking-error usage, and before/after allocations. Selecting a method updates its exact tax-pool trades and cash balance.
+
+The site has **four editable assumptions**: annual tracking-error cap (1.2%, 2.5%, 4%), trading fee (5, 10, 40 bps per traded side), usable capital losses (20%, 80%), and the future tax recapture fraction (0%, 20%). Canada also includes a separate simulated account history with an affiliated recent purchase. Each available combination uses its own numerical optimization output.
+
+There are **11 preset examples** and **108 independently computed combinations** in \`docs/data/assumption_grid.json\`. The static browser only selects stored results. New arbitrary assumptions require generating more cases with the Python solver.
 
 ### Run locally
 
@@ -23,10 +27,14 @@ The default GitHub Pages **Portfolio Manager Decision Desk** lets visitors switc
 python -m pip install -r requirements.txt
 python -m unittest -v test_canadian_rebalancing test_tax_rebalancing
 python tools/build_demo_data.py
+python tools/build_assumption_grid.py
+python tools/verify_dashboard.py
 python -m http.server 8000 --directory docs
 ```
 
 Open http://localhost:8000. The repository currently uses the **master** branch; for deployment choose **Settings → Pages → Deploy from a branch → master → /docs** after committing and pushing the files.
+
+Browser regression testing is optional. Install Playwright with \`python -m pip install playwright\`, run \`python -m playwright install chromium\` if Chrome is unavailable, then execute \`python tools/test_browser_dashboard.py\`. The browser test verifies that each assumption update matches its stored numerical solution and checks the desktop and mobile layouts.
 
 ## Why this optimization is nonconvex
 
@@ -82,7 +90,9 @@ On a distinct synthetic **US$100,000, four-ETF, ten-lot** portfolio with a 2.5% 
 - test_canadian_rebalancing.py — Canadian ACB, chronological transactions, affiliate screening, 30-day rule windows, conservation and optimizer checks
 - test_tax_rebalancing.py — U.S. lots, tax/risk feasibility and objective checks
 - tools/build_demo_data.py — generates **6 Canada + 5 U.S.** actually solved synthetic cases
-- docs/ — static Canada-first decision desk reading docs/data/scenarios.json
+- tools/build_assumption_grid.py — precomputes **108 combinations** of four editable assumptions using actual optimization
+- tools/test_browser_dashboard.py — runs Chrome/Playwright interaction checks at desktop and mobile widths
+- docs/ — static Canada-first decision desk reading both presolved data files
 - RESEARCH_DESIGN.md — method, scope, legal limitations and research verification
 - legacy_sector_strategy/ — complete preserved older sector trading project, inactive
 

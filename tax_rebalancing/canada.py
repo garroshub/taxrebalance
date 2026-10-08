@@ -230,7 +230,8 @@ def review_superficial_loss(sale_date: date, shares_sold:float,
 
 def canadian_demo(name="Canada / Base case", max_tracking_error=.025,
                   trading_cost_bps=10.,loss_utilization=.8,
-                  affiliated_purchase=False)->CanadianScenario:
+                  affiliated_purchase=False,
+                  future_recapture_fraction=.20)->CanadianScenario:
     """100k CAD simulated portfolio, own multi-account transaction history.
 
     Prices held at C$100, holdings XIC 400, XEF 300, XBB 200, XRE 100;
@@ -261,5 +262,5 @@ def canadian_demo(name="Canada / Base case", max_tracking_error=.025,
         loss_utilization=loss_utilization,
         marginal_tax_rate=.42,
         capital_gain_inclusion_fraction=.50,
-        future_recapture_fraction=.20,
+        future_recapture_fraction=future_recapture_fraction,
         risk_aversion=1.)

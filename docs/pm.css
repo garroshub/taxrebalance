@@ -1,0 +1,61 @@
+/* PM decision visuals and assumption controls. Kept separate from legacy CSS. */
+.sidebar{overflow-y:auto;scrollbar-width:thin}
+.sidebar-section select{width:100%;border-color:#3b5262;background-color:#162838;color:#f3f8fa;cursor:pointer}
+.sidebar-section select:focus-visible,.reset-button:focus-visible{outline:2px solid #6de2bd;outline-offset:2px}
+.sidebar-section .formlabel{font-size:11px;color:#c3d7df;margin:13px 0 5px}
+.sidebar-section #assumptionNote{margin-top:13px;line-height:1.5;color:#a9b9c6}
+.reset-button{display:block;width:100%;margin-top:10px;padding:10px 12px;border:1px solid #476976;border-radius:7px;background:#18313e;color:#c1e3dd;font-size:11px;cursor:pointer;text-align:left}
+.reset-button:hover{background:#214452}
+.hero{padding:30px 0 18px}
+.hero h1{max-width:900px;font-size:clamp(31px,4.2vw,52px);line-height:1.15;margin-top:9px}
+.hero h1 em{color:#74d9bb}
+.hero-tag{letter-spacing:.10em;color:#86cdbb}
+.metrics{margin-bottom:15px}
+.pm-summary{border:1px solid #345367;border-radius:13px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,1fr);gap:0;background:linear-gradient(120deg,#142b36,#101f2c 60%,#121f2c);margin-bottom:17px;overflow:hidden}
+.pm-summary-left{padding:23px 27px 25px}
+.pm-summary-right{padding:24px 24px 22px;background:rgba(8,17,28,.35);border-left:1px solid #324859}
+.pm-summary h2{margin:9px 0 10px;letter-spacing:-.035em;font-size:25px;line-height:1.23;color:#f0f7f9}
+.pm-rationale{color:#b0c6d3;font-size:12px;line-height:1.65;margin:0 0 18px;max-width:670px}
+.pm-trade-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:17px}
+.pm-chip{display:inline-flex;align-items:center;font-weight:600;font-size:11px;color:#c4e5db;border:1px solid #376357;border-radius:6px;background:#173b39;padding:5px 9px}
+.pm-chip.pm-chip-risk{background:#3f3327;border-color:#766043;color:#ebc99d}
+.pm-metrics{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pm-metrics>div{background:#132b36;border:1px solid #2d4c5c;border-radius:9px;padding:12px 13px}
+.pm-metrics small,.pm-metrics span{display:block;font-size:10px;color:#a6bfca}
+.pm-metrics strong{display:block;font-variant-numeric:tabular-nums;color:#f3fcfc;letter-spacing:-.035em;font-size:25px;line-height:1.4;font-weight:750}
+.pm-metrics strong.pm-positive{color:#74ddb6}
+.pm-metrics strong.pm-negative{color:#f1b091}
+.pm-metrics span{line-height:1.5;margin-top:3px}
+.risk-meter{height:8px;border-radius:8px;background:#344451;overflow:hidden;margin:8px 0 4px}
+.risk-meter>div{height:100%;background:#6bd2ad;border-radius:8px;transition:width .2s}
+.risk-meter>div.over-limit{background:#e9a567}
+.pm-explain{font-size:11px;color:#9fb3c3;line-height:1.55;margin:8px 0 19px}
+.pm-bridge{display:grid;gap:15px}
+.bridge-row{display:grid;gap:5px}
+.bridge-label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px}
+.bridge-label strong{font-variant-numeric:tabular-nums;font-size:12px}
+.bridge-label span{color:#bdcbd8}
+.bridge-label strong.benefit{color:#76dfb9}
+.bridge-label strong.cost{color:#f1b08c}
+.bridge-track{width:100%;height:12px;background:#203442;position:relative;border-radius:4px;overflow:hidden}
+.bridge-mid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#8696a7;z-index:2;opacity:.65}
+.bridge-bar{position:absolute;height:100%;top:0;border-radius:2px;min-width:0}
+.bridge-bar.positive{background:#57c8a4}
+.bridge-bar.negative{background:#d88e68}
+.bridge-total{padding-top:10px;border-top:1px solid #3a4b58}
+.bridge-total .bridge-label strong{font-size:14px}
+.pm-caveat{font-size:10px;color:#91a9b6;margin:17px 0 0;line-height:1.55}
+.weights-legend{flex-wrap:wrap;gap:11px}
+.legend-dot.post{background:#dca967}
+.bar-post{background:#e0b171;height:100%;border-radius:4px}
+.weightrow{margin-bottom:13px}
+.weightrow .bartrack{height:7px;margin:3px 0}
+.weightrow .weight-top .nums{white-space:normal;text-align:right;line-height:1.4}
+.weightrow .sector{font-size:12px}
+.panel .eyebrow{font-size:9px}
+.panel-heading h2{font-size:17px}
+.data-table .methodname{font-size:11px}
+.methodology h2{font-size:22px}
+@media(max-width:1200px){.pm-summary{grid-template-columns:1fr}.pm-summary-right{border-left:0;border-top:1px solid #324859}.pm-bridge{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px;row-gap:14px}.pm-caveat{margin-top:15px}}
+@media(max-width:790px){.sidebar{overflow:visible}.pm-summary-left,.pm-summary-right{padding:20px}.pm-metrics strong{font-size:22px}}
+@media(max-width:480px){.pm-summary h2{font-size:22px}.pm-metrics{grid-template-columns:1fr 1fr;gap:7px}.pm-metrics>div{padding:10px}.pm-metrics strong{font-size:20px}.pm-bridge{grid-template-columns:1fr}.weightrow .weight-top{align-items:flex-start}.weightrow .weight-top .nums{max-width:68%}}
