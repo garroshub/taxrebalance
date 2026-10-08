@@ -1,9 +1,7 @@
-streamlit>=1.31.0
-pandas>=2.1.4
-numpy>=1.26.0
-matplotlib>=3.8.2
-yfinance>=0.2.36
-plotly>=5.18.0
-scikit-optimize>=0.9.0
-google-generativeai>=0.3.2
-pytest>=7.4.4
+# Primary project: Tax-Aware Rebalancing Lab (Python 3.10+)
+numpy>=1.26,<2
+scipy>=1.15,<1.16
+cvxpy==1.6.5
+# OSQP 1.1.3 import crashes on the validated Windows/Python 3.12 environment.
+# CVXPY uses Clarabel for this project's conic optimization.
+osqp==1.0.4

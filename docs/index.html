@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b111c">
+  <meta name="description" content="Tax-Aware Rebalancing Lab: trace risk constraints, tax-lot harvest decisions, and portfolio trades using research-based convex optimization.">
+  <title>Tax-Aware Rebalancing Lab | Portfolio Decision Desk</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <aside class="sidebar" aria-label="Portfolio scenario controls">
+      <div class="brand"><div class="brand-glyph">T<span>↗</span></div><div><strong>Tax-Aware</strong><small>REBALANCING LAB</small></div></div>
+      <nav class="side-nav">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#comparison">Decision comparison</a>
+        <a href="#trades">Trade recommendations</a>
+        <a href="#taxlots">Tax-lot inventory</a>
+        <a href="#methods">Methodology</a>
+      </nav>
+      <div class="sidebar-section">
+        <div class="eyebrow">RESEARCH SCENARIO</div>
+        <label for="countrySelect" class="formlabel">Tax jurisdiction</label>
+        <select id="countrySelect" aria-label="Tax rules and currency">
+          <option value="CA">Canada · CAD · average ACB</option>
+          <option value="US">United States · USD · tax lots</option>
+        </select>
+        <label for="scenarioSelect" class="formlabel">Presolved scenario</label>
+        <select id="scenarioSelect"><option>Loading actual solver output…</option></select>
+        <p class="tiny muted">Changing scenarios loads a complete stored optimization result, not an approximation.</p>
+      </div>
+      <div class="sidebar-section">
+        <div class="eyebrow">ASSUMPTIONS</div>
+        <div class="assumption"><span>Tracking error cap</span><strong id="assTE">—</strong></div>
+        <div class="assumption"><span>Trading fee</span><strong id="assFee">—</strong></div>
+        <div class="assumption"><span>Loss utilization</span><strong id="assUtil">—</strong></div>
+        <div class="assumption"><span>Future recapture proxy</span><strong id="assFuture">—</strong></div>
+      </div>
+      <div class="side-bottom">
+        <span class="status-dot"></span> <span id="jurisdictionLabel">Canada · ACB simulation</span>
+        <p>100% simulated transactions and ETF prices. No brokerage or personal records needed.</p>
+      </div>
+    </aside>
+    <main class="main" id="overview">
+      <header class="topbar">
+        <div class="top-crumb">Research tools <span>/</span> Tax-aware execution</div>
+        <div class="top-actions"><span class="pill">Synthetic data</span><a href="https://github.com/garroshub/Quant_Sector_Rotation_Strategy" target="_blank" rel="noopener">GitHub ↗</a></div>
+      </header>
+      <section class="hero">
+        <div class="hero-tag">PORTFOLIO MANAGER DECISION DESK <span class="small-dot"></span> OPTIMIZATION MODEL</div>
+        <h1>Make the rebalance.<br><em>Account for the tax.</em></h1>
+        <p>Compare tax-aware rebalancing decisions using simulated Canadian ACB or U.S. tax-lot histories. Inspect portfolio exposure, taxable gains/losses, trade costs, and every constraint.</p>
+      </section>
+      <div class="warning-strip"><span class="warning-icon">i</span> <span id="jurisdictionWarning">Canadian ACB model with simulated CAD purchases. Superficial-loss eligibility is screened conservatively, not legally determined. Not tax advice.</span></div>
+      <section class="metrics" aria-label="Scenario key metrics">
+        <div class="metric"><div class="metric-label">Portfolio equity</div><div class="metric-value" id="kEquity">—</div><div class="metric-footer">Synthetic taxable account</div></div>
+        <div class="metric"><div class="metric-label">Target tracking error cap</div><div class="metric-value" id="kTE">—</div><div class="metric-footer">Annualized covariance model</div></div>
+        <div class="metric"><div class="metric-label" id="kTaxBasisLabel">ACB pools</div><div class="metric-value" id="kLots">—</div><div class="metric-footer" id="kLossLots">Cost-basis inventory</div></div>
+        <div class="metric"><div class="metric-label">Candidate algorithms</div><div class="metric-value">05</div><div class="metric-footer">Including no-trade baseline</div></div>
+      </section>
+      <section class="dashboard-grid" id="comparison">
+        <article class="panel panel-wide">
+          <div class="panel-heading">
+            <div><div class="eyebrow">01 / EVALUATION</div><h2>Decision alternatives</h2><p class="muted">Identical holdings, risk budget and tax assumptions for each method</p></div>
+            <span class="data-pill">ACTUAL SOLVER OUTPUT</span>
+          </div>
+          <div class="scroll-table"><table class="data-table"><thead><tr><th>Method</th><th>TE (annual)</th><th>Modeled tax PV</th><th>Trading fees</th><th>Total objective</th><th>Status</th></tr></thead><tbody id="comparisonBody"></tbody></table></div>
+          <div class="table-note">Objective = modeled net tax PV + explicit trading fees + risk-deviation penalty. Lower is better. Infeasible rows cannot be compared as executable recommendations.</div>
+        </article>
+        <article class="panel portfolio-panel">
+          <div class="panel-heading"><div><div class="eyebrow">02 / PORTFOLIO</div><h2>Allocation drift</h2></div></div>
+          <div class="weights-legend"><span><i class="legend-dot current"></i>Current</span><span><i class="legend-dot target"></i>Target</span></div>
+          <div id="weightsChart"></div>
+          <p class="panel-subtext">The target portfolio is given. The optimizer selects how to trade toward it without violating the tracking-error budget.</p>
+        </article>
+      </section>
+      <section class="dashboard-grid">
+        <article class="panel frontier-panel">
+          <div class="panel-heading">
+            <div><div class="eyebrow">03 / COST–RISK TRADE-OFF</div><h2>Decision frontier</h2><p class="muted">Tracking error vs. modeled implementation objective</p></div>
+          </div>
+          <div id="frontierChart" role="img" aria-label="Scatter plot of feasible portfolio decisions"></div>
+          <div class="chart-legend"><span class="legend-dot teal"></span>Feasible alternative <span class="legend-dot gold"></span>Selected method</div>
+        </article>
+        <article class="panel details-panel" id="trades">
+          <div class="panel-heading">
+            <div><div class="eyebrow">04 / RECOMMENDATION</div><h2>Selected decision</h2></div>
+            <select id="methodSelect" aria-label="Select method to inspect"></select>
+          </div>
+          <div id="decisionStatus"></div>
+          <div class="decision-totals" id="decisionTotals"></div>
+          <div id="tradeHeadline" class="trade-headline"></div>
+          <div class="scroll-table trade-list"><table class="data-table"><thead><tr><th>Side / Ticker</th><th>Tax lot</th><th>Shares</th><th>Proceeds / cost</th></tr></thead><tbody id="tradeBody"></tbody></table></div>
+          <p class="panel-subtext">Tax-lot trades show their basis and holding period. Examine wash-sale exposure and confirm execution constraints before real trading.</p>
+        </article>
+      </section>
+      <section class="panel lot-panel" id="taxlots">
+        <div class="panel-heading"><div><div class="eyebrow">05 / TAX POSITION</div><h2 id="taxBasisHeading">Canadian ACB inventory</h2><p class="muted" id="taxBasisSubtitle">Derived from a chronological synthetic CAD buy/sell ledger</p></div><span class="data-pill" id="taxBasisBadge">AVERAGE ACB BY SECURITY</span></div>
+        <div class="scroll-table"><table class="data-table"><thead><tr><th id="lotBasisHeader">Pool</th><th>ETF</th><th>Shares</th><th>Basis / share</th><th>Price</th><th>Unrealized G/L</th><th>Pre-trade flag</th></tr></thead><tbody id="taxLotBody"></tbody></table></div>
+      </section>
+      <section class="methodology" id="methods">
+        <div class="eyebrow">MODEL TRANSPARENCY</div><h2>What the optimizer does—and does not claim</h2>
+        <div class="method-cards">
+          <div><h3>01 &nbsp; Risk-only</h3><p>Minimizes deviation from the target and explicit trading fees. It does not optimize tax-lot selection.</p></div>
+          <div><h3>02 &nbsp; Greedy harvesting</h3><p>Uses risk-only trades and the most tax-advantageous available cost basis. In Canada there is one averaged ACB pool per identical security, so there is no elective lot selection.</p></div>
+          <div><h3>03 &nbsp; Convex heuristic</h3><p>Relax the buy/sell disjunction, fix trade directions, then solve a feasible convex subproblem and test nearby directions.</p></div>
+          <div><h3>04 &nbsp; Small global check</h3><p>Enumerate all 3^4 buy/sell/hold directions, solve each convex subproblem, and compare objectives. Exact only within the simplified continuous-share model.</p></div>
+        </div>
+        <p class="method-warning" id="taxRuleWarning">Canada: gains/losses are based on averaged ACB, not elective U.S. tax lots. A superficial loss may involve identical-property transactions in a 30-day window before or after the sale and day+30 ownership, including affiliated persons. Those future or linked-account facts require a separate review. The capital gains inclusion and tax rates are explicit simulation assumptions, not tax advice.</p>
+        <div class="method-links"><a id="taxRulesLink" href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/special-rules-other-transactions.html" target="_blank" rel="noopener">CRA: Adjusted cost base ↗</a><a href="https://web.stanford.edu/~boyd/papers/tax_aware_portfolio.html" target="_blank" rel="noopener">Moehle et al., Tax-Aware Portfolio Construction ↗</a></div>
+      </section>
+      <footer class="footer"><span>Tax-Aware Rebalancing Lab · Decision support research prototype</span><span>Precomputed, auditable scenarios · v0.1</span></footer>
+    </main>
+  </div>
+  <script src="./app.js" defer></script>
+</body>
+</html>

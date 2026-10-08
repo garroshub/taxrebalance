@@ -1,0 +1,4450 @@
+{
+  "version": "0.2.0-simulation-only",
+  "source": "Simulated Canada CAD ACB history and simulated US USD tax-lots; no user, brokerage or live market data",
+  "method": "continuous-share convex direction enumeration; exact only in stated simplified model",
+  "limitations": [
+    "Canada: average ACB pools per identical security, not US specific-tax-lot identification",
+    "Canada: 50% illustrative 2026 capital gains inclusion, 42% hypothetical marginal tax rate",
+    "Canada: superficial loss depends on +/-30 calendar days, related acquisitions and day+30 substituted-property holdings",
+    "US wash sales and Canadian superficial losses are NOT fully legally assessed",
+    "Same-ticker buy/sell prohibition is a conservative proxy, not complete tax compliance",
+    "Other identical securities, registered accounts, spouse and related accounts require verification",
+    "Future tax-liability recapture and usable loss ratios are assumptions, not realized cash",
+    "No future tax return, portfolio return or tax-alpha performance is predicted",
+    "Continuous simulated shares, no real brokerage data, live market connections, or trade execution"
+  ],
+  "research_paper": {
+    "title": "Tax-Aware Portfolio Construction via Convex Optimization",
+    "url": "https://web.stanford.edu/~boyd/papers/tax_aware_portfolio.html"
+  },
+  "cases": [
+    {
+      "scenario": "Canada / Average ACB baseline",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00387,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.4411,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00375,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.441,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -969.88151,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1439.22278,
+          "estimated_future_recapture": 359.8057,
+          "estimated_tax_pv": -1079.41709,
+          "transaction_cost": 47.03558,
+          "risk_penalty": 62.5,
+          "post_cash": 14176.93365,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 164.05805,
+              "lot_id": null,
+              "notional": 16405.8046
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 254.85085,
+              "notional": 25485.0848,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -8155.2271,
+              "tax_current_model": -1370.0782,
+              "tax_future_model": 342.5195,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 51.44689,
+              "notional": 5144.6891,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -411.5751,
+              "tax_current_model": -69.1446,
+              "tax_future_model": 17.2862,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1451492,
+            0.3,
+            0.1485531,
+            0.264058
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1685.66878
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -969.88151,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1439.22274,
+          "estimated_future_recapture": 359.80569,
+          "estimated_tax_pv": -1079.41706,
+          "transaction_cost": 47.03555,
+          "risk_penalty": 62.5,
+          "post_cash": 14176.60619,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 164.05954,
+              "lot_id": null,
+              "notional": 16405.9535
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 254.85143,
+              "notional": 25485.1434,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -8155.2459,
+              "tax_current_model": -1370.0813,
+              "tax_future_model": 342.5203,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 51.44452,
+              "notional": 5144.4518,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -411.5561,
+              "tax_current_model": -69.1414,
+              "tax_future_model": 17.2854,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1451486,
+            0.3,
+            0.1485555,
+            0.2640595
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Canada / Strict risk budget",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.012,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00383,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.4411,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00375,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.441,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -748.92648,
+          "tracking_error": 0.012,
+          "estimated_tax_current": -1078.05079,
+          "estimated_future_recapture": 273.10056,
+          "estimated_tax_pv": -804.95024,
+          "transaction_cost": 41.62376,
+          "risk_penalty": 14.4,
+          "post_cash": 1252.58551,
+          "trades": [
+            {
+              "ticker": "XBB",
+              "side": "BUY",
+              "shares": 47.98665,
+              "lot_id": null,
+              "notional": 4798.665
+            },
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 153.6611,
+              "lot_id": null,
+              "notional": 15366.1098
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 203.19982,
+              "notional": 20319.9818,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -6502.3942,
+              "tax_current_model": -1092.4022,
+              "tax_future_model": 273.1006,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 11.39002,
+              "notional": 1139.0023,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 68.3401,
+              "tax_current_model": 14.3514,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1968002,
+            0.28861,
+            0.2479866,
+            0.2536611
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1685.66878
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -748.92648,
+          "tracking_error": 0.012,
+          "estimated_tax_current": -1078.05079,
+          "estimated_future_recapture": 273.10056,
+          "estimated_tax_pv": -804.95024,
+          "transaction_cost": 41.62376,
+          "risk_penalty": 14.4,
+          "post_cash": 1252.58551,
+          "trades": [
+            {
+              "ticker": "XBB",
+              "side": "BUY",
+              "shares": 47.98665,
+              "lot_id": null,
+              "notional": 4798.665
+            },
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 153.6611,
+              "lot_id": null,
+              "notional": 15366.1098
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 203.19982,
+              "notional": 20319.9818,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -6502.3942,
+              "tax_current_model": -1092.4022,
+              "tax_future_model": 273.1006,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 11.39002,
+              "notional": 1139.0023,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 68.3401,
+              "tax_current_model": 14.3514,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1968002,
+            0.28861,
+            0.2479866,
+            0.2536611
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 1.2,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Canada / Flexible risk budget",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.04,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00387,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.4411,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -482.99174,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -707.72084,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": -518.90744,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00375,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -755.2536,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.441,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -1175.83792,
+          "tracking_error": 0.04,
+          "estimated_tax_current": -1862.85278,
+          "estimated_future_recapture": 465.7132,
+          "estimated_tax_pv": -1397.13959,
+          "transaction_cost": 61.30167,
+          "risk_penalty": 160.0,
+          "post_cash": 25844.5877,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 176.9789,
+              "lot_id": null,
+              "notional": 17697.89
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 316.67113,
+              "notional": 31667.1128,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -10133.4761,
+              "tax_current_model": -1702.424,
+              "tax_future_model": 425.606,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 119.36667,
+              "notional": 11936.6666,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -954.9333,
+              "tax_current_model": -160.4288,
+              "tax_future_model": 40.1072,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.0833289,
+            0.3,
+            0.0806333,
+            0.2769789
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.455",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1685.66878
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -1176.29307,
+          "tracking_error": 0.04,
+          "estimated_tax_current": -1864.16513,
+          "estimated_future_recapture": 466.04128,
+          "estimated_tax_pv": -1398.12385,
+          "transaction_cost": 61.83078,
+          "risk_penalty": 160.0,
+          "post_cash": 25168.25433,
+          "trades": [
+            {
+              "ticker": "XEF",
+              "side": "BUY",
+              "shares": 7.00679,
+              "lot_id": null,
+              "notional": 700.6787
+            },
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 175.99668,
+              "lot_id": null,
+              "notional": 17599.6683
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 317.2411,
+              "notional": 31724.1103,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -10151.7153,
+              "tax_current_model": -1705.4882,
+              "tax_future_model": 426.372,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 118.06322,
+              "notional": 11806.3218,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -944.5057,
+              "tax_current_model": -158.677,
+              "tax_future_model": 39.6692,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.0827589,
+            0.3070068,
+            0.0819368,
+            0.2759967
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 4.0,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Canada / Higher trading fees",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": -342.43031,
+          "tracking_error": 0.01663943,
+          "estimated_tax_current": -613.76965,
+          "estimated_future_recapture": 154.01945,
+          "estimated_tax_pv": -459.75019,
+          "transaction_cost": 89.63282,
+          "risk_penalty": 27.68706,
+          "post_cash": 788.09868,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 107.65237,
+              "lot_id": null,
+              "notional": 10765.2371
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 114.59781,
+              "notional": 11459.7808,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -3667.1298,
+              "tax_current_model": -616.0778,
+              "tax_future_model": 154.0195,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 1.83188,
+              "notional": 183.1879,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 10.9913,
+              "tax_current_model": 2.3082,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2854022,
+            0.2981681,
+            0.2,
+            0.2076524
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -342.43032,
+          "tracking_error": 0.01663943,
+          "estimated_tax_current": -613.76966,
+          "estimated_future_recapture": 154.01946,
+          "estimated_tax_pv": -459.7502,
+          "transaction_cost": 89.63282,
+          "risk_penalty": 27.68705,
+          "post_cash": 788.09918,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 107.65237,
+              "lot_id": null,
+              "notional": 10765.237
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 114.59781,
+              "notional": 11459.781,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -3667.1299,
+              "tax_current_model": -616.0778,
+              "tax_future_model": 154.0195,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 1.83188,
+              "notional": 183.188,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 10.9913,
+              "tax_current_model": 2.3082,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2854022,
+            0.2981681,
+            0.2,
+            0.2076524
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -832.71438,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1429.40793,
+          "estimated_future_recapture": 357.35198,
+          "estimated_tax_pv": -1072.05595,
+          "transaction_cost": 176.84157,
+          "risk_penalty": 62.5,
+          "post_cash": 12478.35248,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 157.77599,
+              "lot_id": null,
+              "notional": 15777.5993
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 259.73988,
+              "notional": 25973.9878,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -8311.6761,
+              "tax_current_model": -1396.3616,
+              "tax_future_model": 349.0904,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 24.58806,
+              "notional": 2458.8055,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -196.7044,
+              "tax_current_model": -33.0463,
+              "tax_future_model": 8.2616,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1402601,
+            0.3,
+            0.1754119,
+            0.257776
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1361.32317
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -832.71438,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1429.40713,
+          "estimated_future_recapture": 357.35178,
+          "estimated_tax_pv": -1072.05535,
+          "transaction_cost": 176.84097,
+          "risk_penalty": 62.5,
+          "post_cash": 12478.40232,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 157.775,
+              "lot_id": null,
+              "notional": 15777.5001
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 259.73985,
+              "notional": 25973.9846,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -8311.6751,
+              "tax_current_model": -1396.3614,
+              "tax_future_model": 349.0904,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 24.58759,
+              "notional": 2458.7588,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -196.7007,
+              "tax_current_model": -33.0457,
+              "tax_future_model": 8.2614,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.1402602,
+            0.3,
+            0.1754124,
+            0.257775
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 40.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Canada / Loss utilization limited",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 83.44845,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -141.28064,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": 47.53276,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00387,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -188.8134,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.4411,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": 83.44845,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": -141.28064,
+          "estimated_future_recapture": 188.8134,
+          "estimated_tax_pv": 47.53276,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00375,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": -188.8134,
+              "tax_future_model": 188.8134,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.441,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": 40.8564,
+          "tracking_error": 0.01101318,
+          "estimated_tax_current": -202.52731,
+          "estimated_future_recapture": 202.52731,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 28.72739,
+          "risk_penalty": 12.129,
+          "post_cash": 1381.87057,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 136.58398,
+              "lot_id": null,
+              "notional": 13658.398
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 150.68996,
+              "notional": 15068.996,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4822.0787,
+              "tax_current_model": -202.5273,
+              "tax_future_model": 202.5273,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.24931,
+            0.3,
+            0.2,
+            0.236584
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": 40.8564
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": 40.8564,
+          "tracking_error": 0.01101318,
+          "estimated_tax_current": -202.52731,
+          "estimated_future_recapture": 202.52731,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 28.72739,
+          "risk_penalty": 12.129,
+          "post_cash": 1381.87053,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 136.58398,
+              "lot_id": null,
+              "notional": 13658.3981
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 150.68996,
+              "notional": 15068.996,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4822.0787,
+              "tax_current_model": -202.5273,
+              "tax_future_model": 202.5273,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.24931,
+            0.3,
+            0.2,
+            0.236584
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.2,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Canada / Affiliated recent purchase",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.4,
+        0.3,
+        0.2,
+        0.1
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "Canada (illustrative CAD / average ACB)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 232.933,
+          "tracking_error": 0.04826313,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 232.933,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.4,
+            0.3,
+            0.2,
+            0.1
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 83.44845,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": 47.53276,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 47.53276,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00387,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": 0.0,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": true
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.4411,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": 83.44845,
+          "tracking_error": 0.00636745,
+          "estimated_tax_current": 47.53276,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 47.53276,
+          "transaction_cost": 31.86125,
+          "risk_penalty": 4.05445,
+          "post_cash": 3749.00375,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 140.40192,
+              "lot_id": null,
+              "notional": 14040.192
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 140.48616,
+              "notional": 14048.616,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4495.5571,
+              "tax_current_model": 0.0,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": true
+            },
+            {
+              "ticker": "XEF",
+              "side": "SELL",
+              "lot_id": "ACB-XEF",
+              "shares": 37.72441,
+              "notional": 3772.441,
+              "basis_per_share": 94.0,
+              "days_held": 400,
+              "realized_gain_loss": 226.3465,
+              "tax_current_model": 47.5328,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2595138,
+            0.2622756,
+            0.2,
+            0.2404019
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -74.14402,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -246.55713,
+          "estimated_future_recapture": 61.63928,
+          "estimated_tax_pv": -184.91785,
+          "transaction_cost": 48.27383,
+          "risk_penalty": 62.5,
+          "post_cash": 18962.70243,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 146.31429,
+              "lot_id": null,
+              "notional": 14631.4291
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 152.97381,
+              "notional": 15297.3806,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4895.1618,
+              "tax_current_model": 0.0,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": true
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 183.45025,
+              "notional": 18345.0248,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -1467.602,
+              "tax_current_model": -246.5571,
+              "tax_future_model": 61.6393,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2470262,
+            0.3,
+            0.0165498,
+            0.2463143
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -120.74486
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -74.14402,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -246.55644,
+          "estimated_future_recapture": 61.63911,
+          "estimated_tax_pv": -184.91733,
+          "transaction_cost": 48.27332,
+          "risk_penalty": 62.5,
+          "post_cash": 18962.88259,
+          "trades": [
+            {
+              "ticker": "XRE",
+              "side": "BUY",
+              "shares": 146.31081,
+              "lot_id": null,
+              "notional": 14631.0808
+            },
+            {
+              "ticker": "XIC",
+              "side": "SELL",
+              "lot_id": "ACB-XIC",
+              "shares": 152.97263,
+              "notional": 15297.2632,
+              "basis_per_share": 132.0,
+              "days_held": 400,
+              "realized_gain_loss": -4895.1242,
+              "tax_current_model": 0.0,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": true
+            },
+            {
+              "ticker": "XBB",
+              "side": "SELL",
+              "lot_id": "ACB-XBB",
+              "shares": 183.44974,
+              "notional": 18344.9735,
+              "basis_per_share": 108.0,
+              "days_held": 400,
+              "realized_gain_loss": -1467.5979,
+              "tax_current_model": -246.5564,
+              "tax_future_model": 61.6391,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2470274,
+            0.3,
+            0.0165503,
+            0.2463108
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "Canadian pooled average adjusted cost base (ACB)",
+      "currency": "CAD",
+      "tax_lots": [
+        {
+          "lot_id": "ACB-XIC",
+          "ticker": "XIC",
+          "shares": 400.0,
+          "basis_per_share": 132.0,
+          "total_acb_cad": 52800.0,
+          "days_held": null,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -12800.0
+        },
+        {
+          "lot_id": "ACB-XEF",
+          "ticker": "XEF",
+          "shares": 300.0,
+          "basis_per_share": 94.0,
+          "total_acb_cad": 28200.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1800.0
+        },
+        {
+          "lot_id": "ACB-XBB",
+          "ticker": "XBB",
+          "shares": 200.0,
+          "basis_per_share": 108.0,
+          "total_acb_cad": 21600.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -1600.0
+        },
+        {
+          "lot_id": "ACB-XRE",
+          "ticker": "XRE",
+          "shares": 100.0,
+          "basis_per_share": 80.0,
+          "total_acb_cad": 8000.0,
+          "days_held": null,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2000.0
+        }
+      ],
+      "assets": [
+        "XIC",
+        "XEF",
+        "XBB",
+        "XRE"
+      ],
+      "prices": {
+        "XIC": 100.0,
+        "XEF": 100.0,
+        "XBB": 100.0,
+        "XRE": 100.0
+      },
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "marginal_tax_rate": 0.42,
+        "capital_gain_inclusion_fraction": 0.5,
+        "risk_aversion": 1.0
+      },
+      "superficial_loss_watch": {
+        "lookback_30d_flagged_tickers": [
+          "XIC"
+        ],
+        "future_30d_identical_repurchase": "Must not assume permitted; any future buys or affiliated acquisitions require review",
+        "at_day_30_ownership": "Not knowable at portfolio-decision time; must be monitored",
+        "capital_loss_benefit": "Zero in model when flagged for recent acquisitions; conservative proxy, not CRA adjudication"
+      },
+      "simulated_transactions_count": 5,
+      "warning": "All CAD amounts are synthetic. Affiliated holdings excluded from taxpayer's ACB but flagged for superficial-loss checks. No return filing or tax advice."
+    },
+    {
+      "scenario": "Baseline tax-aware decision",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.35,
+        0.3,
+        0.2,
+        0.15
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "United States (illustrative USD tax lots)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 112.275,
+          "tracking_error": 0.03350746,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 112.275,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.35,
+            0.3,
+            0.2,
+            0.15
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 149.48657,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": 62.30788,
+          "estimated_future_recapture": 59.99879,
+          "estimated_tax_pv": 122.30666,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34415,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8835
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1697
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 35.09966,
+              "notional": 3509.9659,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -1052.9898,
+              "tax_current_model": -168.4784,
+              "tax_future_model": 42.1196,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-202",
+              "shares": 35.09966,
+              "notional": 3509.9659,
+              "basis_per_share": 82.0,
+              "days_held": 200,
+              "realized_gain_loss": 631.7939,
+              "tax_current_model": 221.1279,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 18.09538,
+              "notional": 1809.5382,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -126.6677,
+              "tax_current_model": -35.4669,
+              "tax_future_model": 8.8667,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 14.08197,
+              "notional": 1408.1966,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -225.3115,
+              "tax_current_model": -36.0498,
+              "tax_future_model": 9.0125,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-102",
+              "shares": 11.36172,
+              "notional": 1136.1719,
+              "basis_per_share": 70.0,
+              "days_held": 420,
+              "realized_gain_loss": 340.8516,
+              "tax_current_model": 68.1703,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-103",
+              "shares": 9.28919,
+              "notional": 928.9186,
+              "basis_per_share": 96.0,
+              "days_held": 50,
+              "realized_gain_loss": 37.1567,
+              "tax_current_model": 13.0049,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -357.36814,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -512.73073,
+          "estimated_future_recapture": 128.18268,
+          "estimated_tax_pv": -384.54805,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34519,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.883
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.17
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 88.2947,
+              "notional": 8829.47,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2648.841,
+              "tax_current_model": -423.8146,
+              "tax_future_model": 105.9536,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73288,
+              "notional": 3473.288,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.7261,
+              "tax_current_model": -88.9162,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -719.48171,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1110.00919,
+          "estimated_future_recapture": 277.5023,
+          "estimated_tax_pv": -832.5069,
+          "transaction_cost": 50.52518,
+          "risk_penalty": 62.5,
+          "post_cash": 9893.7612,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 80.37475,
+              "lot_id": null,
+              "notional": 8037.4753
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 122.52973,
+              "lot_id": null,
+              "notional": 12252.9734
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 4e-05,
+              "notional": 0.0039,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -0.0003,
+              "tax_current_model": -0.0001,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 152.34731,
+              "notional": 15234.7312,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2437.557,
+              "tax_current_model": -390.0091,
+              "tax_future_model": 97.5023,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2,
+            0.1476527,
+            0.2803748,
+            0.2725297
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1175.74539
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -719.48171,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1110.00919,
+          "estimated_future_recapture": 277.5023,
+          "estimated_tax_pv": -832.5069,
+          "transaction_cost": 50.52518,
+          "risk_penalty": 62.5,
+          "post_cash": 9893.7612,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 80.37475,
+              "lot_id": null,
+              "notional": 8037.4753
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 122.52973,
+              "lot_id": null,
+              "notional": 12252.9734
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 4e-05,
+              "notional": 0.0039,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -0.0003,
+              "tax_current_model": -0.0001,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 152.34731,
+              "notional": 15234.7312,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2437.557,
+              "tax_current_model": -390.0091,
+              "tax_future_model": 97.5023,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2,
+            0.1476527,
+            0.2803748,
+            0.2725297
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "US individual tax-lot identification (simplified)",
+      "currency": "USD",
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "short_term_tax_rate": 0.35,
+        "long_term_tax_rate": 0.2,
+        "risk_aversion": 1.0,
+        "starting_cash": 0
+      },
+      "prices": {
+        "XLK": 100.0,
+        "XLF": 100.0,
+        "XLV": 100.0,
+        "XLE": 100.0
+      },
+      "assets": [
+        "XLK",
+        "XLF",
+        "XLV",
+        "XLE"
+      ],
+      "tax_lots": [
+        {
+          "lot_id": "K-201",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 130.0,
+          "days_held": 720,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -4500.0
+        },
+        {
+          "lot_id": "K-202",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 82.0,
+          "days_held": 200,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2700.0
+        },
+        {
+          "lot_id": "K-203",
+          "ticker": "XLK",
+          "shares": 50,
+          "basis_per_share": 107.0,
+          "days_held": 80,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -350.0
+        },
+        {
+          "lot_id": "F-101",
+          "ticker": "XLF",
+          "shares": 175,
+          "basis_per_share": 116.0,
+          "days_held": 850,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2800.0
+        },
+        {
+          "lot_id": "F-102",
+          "ticker": "XLF",
+          "shares": 75,
+          "basis_per_share": 70.0,
+          "days_held": 420,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2250.0
+        },
+        {
+          "lot_id": "F-103",
+          "ticker": "XLF",
+          "shares": 50,
+          "basis_per_share": 96.0,
+          "days_held": 50,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 200.0
+        },
+        {
+          "lot_id": "V-301",
+          "ticker": "XLV",
+          "shares": 75,
+          "basis_per_share": 125.0,
+          "days_held": 600,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -1875.0
+        },
+        {
+          "lot_id": "V-302",
+          "ticker": "XLV",
+          "shares": 125,
+          "basis_per_share": 83.0,
+          "days_held": 100,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2125.0
+        },
+        {
+          "lot_id": "E-401",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 135.0,
+          "days_held": 700,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2625.0
+        },
+        {
+          "lot_id": "E-402",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 82.0,
+          "days_held": 170,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1350.0
+        }
+      ]
+    },
+    {
+      "scenario": "Tighter tracking error",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.35,
+        0.3,
+        0.2,
+        0.15
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.012,
+      "jurisdiction": "United States (illustrative USD tax lots)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 112.275,
+          "tracking_error": 0.03350746,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 112.275,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.35,
+            0.3,
+            0.2,
+            0.15
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 149.47051,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": 62.28651,
+          "estimated_future_recapture": 60.00409,
+          "estimated_tax_pv": 122.2906,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34416,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8835
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1697
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 35.1014,
+              "notional": 3510.14,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -1053.042,
+              "tax_current_model": -168.4867,
+              "tax_future_model": 42.1217,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-202",
+              "shares": 35.1014,
+              "notional": 3510.14,
+              "basis_per_share": 82.0,
+              "days_held": 200,
+              "realized_gain_loss": 631.8252,
+              "tax_current_model": 221.1388,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 18.0919,
+              "notional": 1809.19,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -126.6433,
+              "tax_current_model": -35.4601,
+              "tax_future_model": 8.865,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 14.08966,
+              "notional": 1408.9655,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -225.4345,
+              "tax_current_model": -36.0695,
+              "tax_future_model": 9.0174,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-102",
+              "shares": 11.36164,
+              "notional": 1136.1641,
+              "basis_per_share": 70.0,
+              "days_held": 420,
+              "realized_gain_loss": 340.8492,
+              "tax_current_model": 68.1698,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-103",
+              "shares": 9.28157,
+              "notional": 928.1574,
+              "basis_per_share": 96.0,
+              "days_held": 50,
+              "realized_gain_loss": 37.1263,
+              "tax_current_model": 12.9942,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -357.36813,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -512.73071,
+          "estimated_future_recapture": 128.18268,
+          "estimated_tax_pv": -384.54803,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.8201,
+          "post_cash": 221.34419,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.883
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.17
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 88.2947,
+              "notional": 8829.47,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2648.841,
+              "tax_current_model": -423.8146,
+              "tax_future_model": 105.9536,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73287,
+              "notional": 3473.287,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.7259,
+              "tax_current_model": -88.9161,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -609.86482,
+          "tracking_error": 0.012,
+          "estimated_tax_current": -885.0993,
+          "estimated_future_recapture": 221.27483,
+          "estimated_tax_pv": -663.82448,
+          "transaction_cost": 39.55966,
+          "risk_penalty": 14.4,
+          "post_cash": 4190.08651,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 65.59151,
+              "lot_id": null,
+              "notional": 6559.1511
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 111.05855,
+              "lot_id": null,
+              "notional": 11105.8551
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 144.90902,
+              "notional": 14490.9019,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4347.2706,
+              "tax_current_model": -695.5633,
+              "tax_future_model": 173.8908,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 74.0375,
+              "notional": 7403.7505,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -1184.6001,
+              "tax_current_model": -189.536,
+              "tax_future_model": 47.384,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.205091,
+            0.2259625,
+            0.2655915,
+            0.2610586
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1175.74539
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -609.86482,
+          "tracking_error": 0.012,
+          "estimated_tax_current": -885.0993,
+          "estimated_future_recapture": 221.27483,
+          "estimated_tax_pv": -663.82448,
+          "transaction_cost": 39.55966,
+          "risk_penalty": 14.4,
+          "post_cash": 4190.08651,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 65.59151,
+              "lot_id": null,
+              "notional": 6559.1511
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 111.05855,
+              "lot_id": null,
+              "notional": 11105.8551
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 144.90902,
+              "notional": 14490.9019,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4347.2706,
+              "tax_current_model": -695.5633,
+              "tax_future_model": 173.8908,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 74.0375,
+              "notional": 7403.7505,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -1184.6001,
+              "tax_current_model": -189.536,
+              "tax_future_model": 47.384,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.205091,
+            0.2259625,
+            0.2655915,
+            0.2610586
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "US individual tax-lot identification (simplified)",
+      "currency": "USD",
+      "parameters": {
+        "max_tracking_error_pct": 1.2,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "short_term_tax_rate": 0.35,
+        "long_term_tax_rate": 0.2,
+        "risk_aversion": 1.0,
+        "starting_cash": 0
+      },
+      "prices": {
+        "XLK": 100.0,
+        "XLF": 100.0,
+        "XLV": 100.0,
+        "XLE": 100.0
+      },
+      "assets": [
+        "XLK",
+        "XLF",
+        "XLV",
+        "XLE"
+      ],
+      "tax_lots": [
+        {
+          "lot_id": "K-201",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 130.0,
+          "days_held": 720,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -4500.0
+        },
+        {
+          "lot_id": "K-202",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 82.0,
+          "days_held": 200,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2700.0
+        },
+        {
+          "lot_id": "K-203",
+          "ticker": "XLK",
+          "shares": 50,
+          "basis_per_share": 107.0,
+          "days_held": 80,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -350.0
+        },
+        {
+          "lot_id": "F-101",
+          "ticker": "XLF",
+          "shares": 175,
+          "basis_per_share": 116.0,
+          "days_held": 850,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2800.0
+        },
+        {
+          "lot_id": "F-102",
+          "ticker": "XLF",
+          "shares": 75,
+          "basis_per_share": 70.0,
+          "days_held": 420,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2250.0
+        },
+        {
+          "lot_id": "F-103",
+          "ticker": "XLF",
+          "shares": 50,
+          "basis_per_share": 96.0,
+          "days_held": 50,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 200.0
+        },
+        {
+          "lot_id": "V-301",
+          "ticker": "XLV",
+          "shares": 75,
+          "basis_per_share": 125.0,
+          "days_held": 600,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -1875.0
+        },
+        {
+          "lot_id": "V-302",
+          "ticker": "XLV",
+          "shares": 125,
+          "basis_per_share": 83.0,
+          "days_held": 100,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2125.0
+        },
+        {
+          "lot_id": "E-401",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 135.0,
+          "days_held": 700,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2625.0
+        },
+        {
+          "lot_id": "E-402",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 82.0,
+          "days_held": 170,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1350.0
+        }
+      ]
+    },
+    {
+      "scenario": "Flexible risk tolerance",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.35,
+        0.3,
+        0.2,
+        0.15
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.04,
+      "jurisdiction": "United States (illustrative USD tax lots)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": true,
+          "objective_dollars": 112.275,
+          "tracking_error": 0.03350746,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 112.275,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.35,
+            0.3,
+            0.2,
+            0.15
+          ],
+          "violations": [],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 149.50482,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": 62.33221,
+          "estimated_future_recapture": 59.99271,
+          "estimated_tax_pv": 122.32491,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34416,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8835
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1697
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 35.09769,
+              "notional": 3509.7687,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -1052.9306,
+              "tax_current_model": -168.4689,
+              "tax_future_model": 42.1172,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-202",
+              "shares": 35.09769,
+              "notional": 3509.7687,
+              "basis_per_share": 82.0,
+              "days_held": 200,
+              "realized_gain_loss": 631.7584,
+              "tax_current_model": 221.1154,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 18.09933,
+              "notional": 1809.9327,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -126.6953,
+              "tax_current_model": -35.4747,
+              "tax_future_model": 8.8687,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 14.07314,
+              "notional": 1407.3142,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -225.1703,
+              "tax_current_model": -36.0272,
+              "tax_future_model": 9.0068,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-102",
+              "shares": 11.36173,
+              "notional": 1136.1735,
+              "basis_per_share": 70.0,
+              "days_held": 420,
+              "realized_gain_loss": 340.852,
+              "tax_current_model": 68.1704,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-103",
+              "shares": 9.29799,
+              "notional": 929.7994,
+              "basis_per_share": 96.0,
+              "days_held": 50,
+              "realized_gain_loss": 37.192,
+              "tax_current_model": 13.0172,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -357.36814,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -512.73073,
+          "estimated_future_recapture": 128.18268,
+          "estimated_tax_pv": -384.54805,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.8201,
+          "post_cash": 221.34419,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.883
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.17
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 88.29471,
+              "notional": 8829.471,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2648.8413,
+              "tax_current_model": -423.8146,
+              "tax_future_model": 105.9537,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73286,
+              "notional": 3473.286,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.7258,
+              "tax_current_model": -88.9161,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -755.85331,
+          "tracking_error": 0.03656092,
+          "estimated_tax_current": -1265.99999,
+          "estimated_future_recapture": 316.5,
+          "estimated_tax_pv": -949.5,
+          "transaction_cost": 59.97657,
+          "risk_penalty": 133.67012,
+          "post_cash": 14963.45717,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 92.11591,
+              "lot_id": null,
+              "notional": 9211.5911
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 132.64975,
+              "lot_id": null,
+              "notional": 13264.9748
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 50.0,
+              "notional": 4999.9997,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -350.0,
+              "tax_current_model": -98.0,
+              "tax_future_model": 24.5,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 175.0,
+              "notional": 17500.0,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2800.0,
+              "tax_current_model": -448.0,
+              "tax_future_model": 112.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.15,
+            0.125,
+            0.2921159,
+            0.2826497
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -1175.74539
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -755.85331,
+          "tracking_error": 0.03656092,
+          "estimated_tax_current": -1265.99999,
+          "estimated_future_recapture": 316.5,
+          "estimated_tax_pv": -949.5,
+          "transaction_cost": 59.97657,
+          "risk_penalty": 133.67012,
+          "post_cash": 14963.45717,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 92.11591,
+              "lot_id": null,
+              "notional": 9211.5911
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 132.64975,
+              "lot_id": null,
+              "notional": 13264.9748
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 50.0,
+              "notional": 4999.9997,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -350.0,
+              "tax_current_model": -98.0,
+              "tax_future_model": 24.5,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 175.0,
+              "notional": 17500.0,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2800.0,
+              "tax_current_model": -448.0,
+              "tax_future_model": 112.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.15,
+            0.125,
+            0.2921159,
+            0.2826497
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "US individual tax-lot identification (simplified)",
+      "currency": "USD",
+      "parameters": {
+        "max_tracking_error_pct": 4.0,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "short_term_tax_rate": 0.35,
+        "long_term_tax_rate": 0.2,
+        "risk_aversion": 1.0,
+        "starting_cash": 0
+      },
+      "prices": {
+        "XLK": 100.0,
+        "XLF": 100.0,
+        "XLV": 100.0,
+        "XLE": 100.0
+      },
+      "assets": [
+        "XLK",
+        "XLF",
+        "XLV",
+        "XLE"
+      ],
+      "tax_lots": [
+        {
+          "lot_id": "K-201",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 130.0,
+          "days_held": 720,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -4500.0
+        },
+        {
+          "lot_id": "K-202",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 82.0,
+          "days_held": 200,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2700.0
+        },
+        {
+          "lot_id": "K-203",
+          "ticker": "XLK",
+          "shares": 50,
+          "basis_per_share": 107.0,
+          "days_held": 80,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -350.0
+        },
+        {
+          "lot_id": "F-101",
+          "ticker": "XLF",
+          "shares": 175,
+          "basis_per_share": 116.0,
+          "days_held": 850,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2800.0
+        },
+        {
+          "lot_id": "F-102",
+          "ticker": "XLF",
+          "shares": 75,
+          "basis_per_share": 70.0,
+          "days_held": 420,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2250.0
+        },
+        {
+          "lot_id": "F-103",
+          "ticker": "XLF",
+          "shares": 50,
+          "basis_per_share": 96.0,
+          "days_held": 50,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 200.0
+        },
+        {
+          "lot_id": "V-301",
+          "ticker": "XLV",
+          "shares": 75,
+          "basis_per_share": 125.0,
+          "days_held": 600,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -1875.0
+        },
+        {
+          "lot_id": "V-302",
+          "ticker": "XLV",
+          "shares": 125,
+          "basis_per_share": 83.0,
+          "days_held": 100,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2125.0
+        },
+        {
+          "lot_id": "E-401",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 135.0,
+          "days_held": 700,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2625.0
+        },
+        {
+          "lot_id": "E-402",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 82.0,
+          "days_held": 170,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1350.0
+        }
+      ]
+    },
+    {
+      "scenario": "High trading costs",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.35,
+        0.3,
+        0.2,
+        0.15
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "United States (illustrative USD tax lots)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 112.275,
+          "tracking_error": 0.03350746,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 112.275,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.35,
+            0.3,
+            0.2,
+            0.15
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 112.41376,
+          "tracking_error": 0.0175263,
+          "estimated_tax_current": 0.55974,
+          "estimated_future_recapture": 33.83433,
+          "estimated_tax_pv": 34.39407,
+          "transaction_cost": 47.30257,
+          "risk_penalty": 30.71711,
+          "post_cash": 1e-05,
+          "trades": [
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 58.89171,
+              "lot_id": null,
+              "notional": 5889.1705
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 21.57096,
+              "notional": 2157.0962,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -647.1289,
+              "tax_current_model": -103.5406,
+              "tax_future_model": 25.8852,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-202",
+              "shares": 21.57096,
+              "notional": 2157.0962,
+              "basis_per_share": 82.0,
+              "days_held": 200,
+              "realized_gain_loss": 388.2773,
+              "tax_current_model": 135.8971,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 16.22281,
+              "notional": 1622.2806,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -113.5596,
+              "tax_current_model": -31.7967,
+              "tax_future_model": 7.9492,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2906353,
+            0.3,
+            0.2,
+            0.2088917
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": -135.69334,
+          "tracking_error": 0.0175263,
+          "estimated_tax_current": -284.9507,
+          "estimated_future_recapture": 71.23768,
+          "estimated_tax_pv": -213.71303,
+          "transaction_cost": 47.30258,
+          "risk_penalty": 30.71711,
+          "post_cash": -0.00058,
+          "trades": [
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 58.89171,
+              "lot_id": null,
+              "notional": 5889.171
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 59.36473,
+              "notional": 5936.473,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -1780.9419,
+              "tax_current_model": -284.9507,
+              "tax_future_model": 71.2377,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2906353,
+            0.3,
+            0.2,
+            0.2088917
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": -573.87158,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1094.27769,
+          "estimated_future_recapture": 273.56942,
+          "estimated_tax_pv": -820.70827,
+          "transaction_cost": 184.33668,
+          "risk_penalty": 62.5,
+          "post_cash": 12971.93685,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 52.03375,
+              "lot_id": null,
+              "notional": 5203.375
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 112.60574,
+              "lot_id": null,
+              "notional": 11260.5736
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 146.20222,
+              "notional": 14620.2221,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2339.2355,
+              "tax_current_model": -374.2777,
+              "tax_future_model": 93.5694,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2,
+            0.1537978,
+            0.2520338,
+            0.2626057
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": -924.42625
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": -573.87158,
+          "tracking_error": 0.025,
+          "estimated_tax_current": -1094.27769,
+          "estimated_future_recapture": 273.56942,
+          "estimated_tax_pv": -820.70827,
+          "transaction_cost": 184.33668,
+          "risk_penalty": 62.5,
+          "post_cash": 12971.93685,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 52.03375,
+              "lot_id": null,
+              "notional": 5203.375
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 112.60574,
+              "lot_id": null,
+              "notional": 11260.5736
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 150.0,
+              "notional": 15000.0,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -4500.0,
+              "tax_current_model": -720.0,
+              "tax_future_model": 180.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 146.20222,
+              "notional": 14620.2221,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -2339.2355,
+              "tax_current_model": -374.2777,
+              "tax_future_model": 93.5694,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2,
+            0.1537978,
+            0.2520338,
+            0.2626057
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "US individual tax-lot identification (simplified)",
+      "currency": "USD",
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 40.0,
+        "loss_utilization": 0.8,
+        "future_recapture_fraction": 0.2,
+        "short_term_tax_rate": 0.35,
+        "long_term_tax_rate": 0.2,
+        "risk_aversion": 1.0,
+        "starting_cash": 0
+      },
+      "prices": {
+        "XLK": 100.0,
+        "XLF": 100.0,
+        "XLV": 100.0,
+        "XLE": 100.0
+      },
+      "assets": [
+        "XLK",
+        "XLF",
+        "XLV",
+        "XLE"
+      ],
+      "tax_lots": [
+        {
+          "lot_id": "K-201",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 130.0,
+          "days_held": 720,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -4500.0
+        },
+        {
+          "lot_id": "K-202",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 82.0,
+          "days_held": 200,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2700.0
+        },
+        {
+          "lot_id": "K-203",
+          "ticker": "XLK",
+          "shares": 50,
+          "basis_per_share": 107.0,
+          "days_held": 80,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -350.0
+        },
+        {
+          "lot_id": "F-101",
+          "ticker": "XLF",
+          "shares": 175,
+          "basis_per_share": 116.0,
+          "days_held": 850,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2800.0
+        },
+        {
+          "lot_id": "F-102",
+          "ticker": "XLF",
+          "shares": 75,
+          "basis_per_share": 70.0,
+          "days_held": 420,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2250.0
+        },
+        {
+          "lot_id": "F-103",
+          "ticker": "XLF",
+          "shares": 50,
+          "basis_per_share": 96.0,
+          "days_held": 50,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 200.0
+        },
+        {
+          "lot_id": "V-301",
+          "ticker": "XLV",
+          "shares": 75,
+          "basis_per_share": 125.0,
+          "days_held": 600,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -1875.0
+        },
+        {
+          "lot_id": "V-302",
+          "ticker": "XLV",
+          "shares": 125,
+          "basis_per_share": 83.0,
+          "days_held": 100,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2125.0
+        },
+        {
+          "lot_id": "E-401",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 135.0,
+          "days_held": 700,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2625.0
+        },
+        {
+          "lot_id": "E-402",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 82.0,
+          "days_held": 170,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1350.0
+        }
+      ]
+    },
+    {
+      "scenario": "Limited usable tax losses",
+      "equity": 100000.0,
+      "initial_weights": [
+        0.35,
+        0.3,
+        0.2,
+        0.15
+      ],
+      "target_weights": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_tracking_error": 0.025,
+      "jurisdiction": "United States (illustrative USD tax lots)",
+      "methods": [
+        {
+          "method": "hold",
+          "feasible": false,
+          "objective_dollars": 112.275,
+          "tracking_error": 0.03350746,
+          "estimated_tax_current": 0.0,
+          "estimated_future_recapture": 0.0,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 0.0,
+          "risk_penalty": 112.275,
+          "post_cash": 0.0,
+          "trades": [],
+          "post_weights": [
+            0.35,
+            0.3,
+            0.2,
+            0.15
+          ],
+          "violations": [
+            "tracking_error"
+          ],
+          "solver_status": "feasible",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "risk_only_rebalance",
+          "feasible": true,
+          "objective_dollars": 329.48293,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": 242.30424,
+          "estimated_future_recapture": 59.99879,
+          "estimated_tax_pv": 302.30303,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34415,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8835
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1697
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 35.09966,
+              "notional": 3509.9659,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -1052.9898,
+              "tax_current_model": -42.1196,
+              "tax_future_model": 42.1196,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-202",
+              "shares": 35.09966,
+              "notional": 3509.9659,
+              "basis_per_share": 82.0,
+              "days_held": 200,
+              "realized_gain_loss": 631.7939,
+              "tax_current_model": 221.1279,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 18.09538,
+              "notional": 1809.5382,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -126.6677,
+              "tax_current_model": -8.8667,
+              "tax_future_model": 8.8667,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 14.08197,
+              "notional": 1408.1966,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -225.3115,
+              "tax_current_model": -9.0125,
+              "tax_future_model": 9.0125,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-102",
+              "shares": 11.36172,
+              "notional": 1136.1719,
+              "basis_per_share": 70.0,
+              "days_held": 420,
+              "realized_gain_loss": 340.8516,
+              "tax_current_model": 68.1703,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-103",
+              "shares": 9.28919,
+              "notional": 928.9186,
+              "basis_per_share": 96.0,
+              "days_held": 50,
+              "realized_gain_loss": 37.1567,
+              "tax_current_model": 13.0049,
+              "tax_future_model": 0.0,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "greedy_loss_harvest",
+          "feasible": true,
+          "objective_dollars": 27.17991,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -128.18268,
+          "estimated_future_recapture": 128.18268,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34519,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.883
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.17
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 88.2947,
+              "notional": 8829.47,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2648.841,
+              "tax_current_model": -105.9536,
+              "tax_future_model": 105.9536,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73288,
+              "notional": 3473.288,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.7261,
+              "tax_current_model": -22.229,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "greedy_lot_reallocation_of_risk_only_trades",
+          "explored_patterns": 0,
+          "relaxed_lower_bound": null
+        },
+        {
+          "method": "two_stage_convex_heuristic",
+          "feasible": true,
+          "objective_dollars": 27.17991,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -113.17378,
+          "estimated_future_recapture": 113.17378,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34535,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8829
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1696
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 67.1554,
+              "notional": 6715.54,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2014.662,
+              "tax_current_model": -80.5865,
+              "tax_future_model": 80.5865,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 21.1393,
+              "notional": 2113.9303,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -147.9751,
+              "tax_current_model": -10.3583,
+              "tax_future_model": 10.3583,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73287,
+              "notional": 3473.2874,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.726,
+              "tax_current_model": -22.229,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve; objective gap vs enumeration $0.000",
+          "explored_patterns": 9,
+          "relaxed_lower_bound": 27.17991
+        },
+        {
+          "method": "enumerated_global_small_continuous",
+          "feasible": true,
+          "objective_dollars": 27.17991,
+          "tracking_error": 0.00531046,
+          "estimated_tax_current": -113.17378,
+          "estimated_future_recapture": 113.17378,
+          "estimated_tax_pv": 0.0,
+          "transaction_cost": 24.35981,
+          "risk_penalty": 2.82009,
+          "post_cash": 221.34535,
+          "trades": [
+            {
+              "ticker": "XLV",
+              "side": "BUY",
+              "shares": 29.59883,
+              "lot_id": null,
+              "notional": 2959.8829
+            },
+            {
+              "ticker": "XLE",
+              "side": "BUY",
+              "shares": 90.9717,
+              "lot_id": null,
+              "notional": 9097.1696
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-201",
+              "shares": 67.1554,
+              "notional": 6715.54,
+              "basis_per_share": 130.0,
+              "days_held": 720,
+              "realized_gain_loss": -2014.662,
+              "tax_current_model": -80.5865,
+              "tax_future_model": 80.5865,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLK",
+              "side": "SELL",
+              "lot_id": "K-203",
+              "shares": 21.1393,
+              "notional": 2113.9303,
+              "basis_per_share": 107.0,
+              "days_held": 80,
+              "realized_gain_loss": -147.9751,
+              "tax_current_model": -10.3583,
+              "tax_future_model": 10.3583,
+              "recent_replacement_flag": false
+            },
+            {
+              "ticker": "XLF",
+              "side": "SELL",
+              "lot_id": "F-101",
+              "shares": 34.73287,
+              "notional": 3473.2874,
+              "basis_per_share": 116.0,
+              "days_held": 850,
+              "realized_gain_loss": -555.726,
+              "tax_current_model": -22.229,
+              "tax_future_model": 22.229,
+              "recent_replacement_flag": false
+            }
+          ],
+          "post_weights": [
+            0.2617053,
+            0.2652671,
+            0.2295988,
+            0.2409717
+          ],
+          "violations": [],
+          "solver_status": "convex_direction_solve",
+          "explored_patterns": 81,
+          "relaxed_lower_bound": null
+        }
+      ],
+      "tax_basis_method": "US individual tax-lot identification (simplified)",
+      "currency": "USD",
+      "parameters": {
+        "max_tracking_error_pct": 2.5,
+        "transaction_cost_bps": 10.0,
+        "loss_utilization": 0.2,
+        "future_recapture_fraction": 0.2,
+        "short_term_tax_rate": 0.35,
+        "long_term_tax_rate": 0.2,
+        "risk_aversion": 1.0,
+        "starting_cash": 0
+      },
+      "prices": {
+        "XLK": 100.0,
+        "XLF": 100.0,
+        "XLV": 100.0,
+        "XLE": 100.0
+      },
+      "assets": [
+        "XLK",
+        "XLF",
+        "XLV",
+        "XLE"
+      ],
+      "tax_lots": [
+        {
+          "lot_id": "K-201",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 130.0,
+          "days_held": 720,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -4500.0
+        },
+        {
+          "lot_id": "K-202",
+          "ticker": "XLK",
+          "shares": 150,
+          "basis_per_share": 82.0,
+          "days_held": 200,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2700.0
+        },
+        {
+          "lot_id": "K-203",
+          "ticker": "XLK",
+          "shares": 50,
+          "basis_per_share": 107.0,
+          "days_held": 80,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -350.0
+        },
+        {
+          "lot_id": "F-101",
+          "ticker": "XLF",
+          "shares": 175,
+          "basis_per_share": 116.0,
+          "days_held": 850,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2800.0
+        },
+        {
+          "lot_id": "F-102",
+          "ticker": "XLF",
+          "shares": 75,
+          "basis_per_share": 70.0,
+          "days_held": 420,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2250.0
+        },
+        {
+          "lot_id": "F-103",
+          "ticker": "XLF",
+          "shares": 50,
+          "basis_per_share": 96.0,
+          "days_held": 50,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 200.0
+        },
+        {
+          "lot_id": "V-301",
+          "ticker": "XLV",
+          "shares": 75,
+          "basis_per_share": 125.0,
+          "days_held": 600,
+          "recent_replacement_flag": true,
+          "unrealized_gain_loss": -1875.0
+        },
+        {
+          "lot_id": "V-302",
+          "ticker": "XLV",
+          "shares": 125,
+          "basis_per_share": 83.0,
+          "days_held": 100,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 2125.0
+        },
+        {
+          "lot_id": "E-401",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 135.0,
+          "days_held": 700,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": -2625.0
+        },
+        {
+          "lot_id": "E-402",
+          "ticker": "XLE",
+          "shares": 75,
+          "basis_per_share": 82.0,
+          "days_held": 170,
+          "recent_replacement_flag": false,
+          "unrealized_gain_loss": 1350.0
+        }
+      ]
+    }
+  ]
+}

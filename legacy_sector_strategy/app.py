@@ -11,13 +11,13 @@ import strategy_analysis_agent as agent
 
 # Set page config
 st.set_page_config(
-    page_title="ETF Rotation Strategy Dashboard",
+    page_title="Sector Long–Short Pair Strategy",
     page_icon="📈",
     layout="wide"
 )
 
 # Title and description
-st.title("📈 ETF Sector Rotation Strategy Dashboard")
+st.title("📈 Sector ETF Long–Short Pair Strategy")
 
 # Create two columns for the description
 col1, col2 = st.columns(2)
@@ -32,8 +32,10 @@ with col1:
       * Higher energy indicates stronger trend momentum
       * Normalized by price volatility for cross-asset comparison
     - 🔍 Multi-timeframe Trend Analysis
-    - 🎯 Select Strongest Momentum ETF
-    - 📱 Single Position Focus
+    - 🎯 Rank six sector ETFs by the same MA Energy signal
+    - 📈 Buy the highest-ranked sector and short the lowest-ranked sector together
+    - ⚖️ Target +50% / −50% for a near dollar-neutral pair (1x combined gross)
+    - 🧪 Compare with a separate, explicitly long-only control
     """)
 
 # Second column
@@ -44,8 +46,9 @@ with col2:
       * VIX > VIX_EXTREME_THRESHOLD: ❌ Exit All
       * VIX > VIX_HIGH_THRESHOLD: ⚠️ 50% Size
       * VIX ≤ VIX_HIGH_THRESHOLD: ✅ Full Size
-    - 🎚️ Trailing Stop: TRAILING_STOP
-    - 🔒 Max Drawdown: MAX_DRAWDOWN_STOP
+    - 🎚️ Close-triggered trailing stop, executed next trading close
+    - 🔒 Drawdown and short margin / gross-exposure controls
+    - 🧾 Restricted short proceeds, annual borrow fees, and two-leg trading costs
     """)
 
 # Create MA Energy example using plotly
@@ -131,6 +134,17 @@ vix_extreme = st.sidebar.slider(
 
 # Backtest Parameters
 st.sidebar.subheader("Backtest Settings")
+allow_short = st.sidebar.checkbox(
+    "Enable strongest-long / weakest-short pair", value=True,
+    help="Default strategy: long the highest MA Energy sector and short the lowest simultaneously. Unchecking is a long-only ablation, not the main strategy. VIX is never traded."
+)
+transaction_cost_bps = st.sidebar.slider(
+    "Transaction cost (bps per traded side)", 0, 50, 10, 5
+)
+annual_borrow_cost_bps = st.sidebar.slider(
+    "Annual short borrow fee (bps)", 0, 1000, 200, 25,
+    help="A constant illustration; historical borrowing availability and rates are unobserved."
+)
 start_date = st.sidebar.date_input(
     "Start Date",
     value=datetime(2000, 1, 1),
@@ -158,6 +172,9 @@ if st.sidebar.button('🚀 Run Backtest'):
     model.MAX_DRAWDOWN_STOP = max_drawdown_stop
     model.VIX_HIGH_THRESHOLD = vix_high
     model.VIX_EXTREME_THRESHOLD = vix_extreme
+    model.ALLOW_SHORT = allow_short
+    model.TRANSACTION_COST_BPS = transaction_cost_bps
+    model.ANNUAL_BORROW_COST_BPS = annual_borrow_cost_bps
     
     with st.spinner('📊 Downloading data and running backtest...'):
         try:

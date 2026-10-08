@@ -21,10 +21,25 @@ TRAILING_STOP = 0.05  # Trailing stop loss percentage
 MAX_DRAWDOWN_STOP = 0.20  # Maximum drawdown stop loss percentage
 VIX_HIGH_THRESHOLD = 25  # VIX high threshold
 VIX_EXTREME_THRESHOLD = 50  # VIX extreme threshold
+TRANSACTION_COST_BPS = 10.0
+SLIPPAGE_BPS = 0.0
+REBALANCE_EVERY = 21
+COOLDOWN_BARS = 21
+SIGNAL_METHOD = "ma_energy"
+ALLOW_SHORT = True
+MAX_GROSS_EXPOSURE = 1.0
+ANNUAL_BORROW_COST_BPS = 200.0
+INITIAL_SHORT_MARGIN = 0.50
+MAINTENANCE_SHORT_MARGIN = 0.30
+EXECUTION_MODE = "incremental"  # Signed share differences; no redundant roundtrip
+GROSS_RISK_RESPONSE = "trim"  # Above drift band, resize two legs at next close
+GROSS_DRIFT_BAND = 0.10  # Research assumption: 10% post-entry price drift tolerance
 
-def download_data(start_date):
+
+def download_data(start_date, end_date=None):
     """
-    Download historical data for ETFs and VIX
+    Download corporate-action-adjusted ETF closing prices and VIX.
+    end_date is exclusive (Yahoo convention), or omit it for latest close.
     
     Args:
         start_date: Start date for data download
@@ -43,7 +58,7 @@ def download_data(start_date):
         try:
             print(f"Downloading data for {etf}...")
             ticker = yf.Ticker(etf)
-            hist = ticker.history(start=start_date, end=datetime.now().strftime('%Y-%m-%d'))['Close']
+            hist = ticker.history(start=start_date, end=end_date or datetime.now().strftime('%Y-%m-%d'), auto_adjust=True)['Close']
             if len(hist) == 0:
                 print(f"Warning: No data available for {etf}")
                 download_failed = True
@@ -66,7 +81,7 @@ def download_data(start_date):
     try:
         print("Downloading VIX data...")
         vix = yf.Ticker('^VIX')
-        vix_hist = vix.history(start=start_date, end=datetime.now().strftime('%Y-%m-%d'))['Close']
+        vix_hist = vix.history(start=start_date, end=end_date or datetime.now().strftime('%Y-%m-%d'), auto_adjust=True)['Close']
         if len(vix_hist) == 0:
             print("Warning: No VIX data available")
             return None
@@ -119,195 +134,98 @@ def ma_energy(prices, window):
     energy = (prices - ma) / ma
     return energy
 
+# Audited event-time trading engine, preserving the public UI/test signatures.
+from strategy_backtest import BacktestConfig, calculate_signals, backtest_strategy
+from strategy_backtest import _target as _deterministic_target
+
+
+def _strategy_config(**overrides):
+    values = dict(
+        initial_capital=INITIAL_CAPITAL,
+        ma_windows=tuple(MA_WINDOWS),
+        vol_window=VOL_WINDOW,
+        min_history=max(MIN_HISTORY, max(MA_WINDOWS)),
+        signal_threshold=BASE_THRESHOLD,
+        vix_high=VIX_HIGH_THRESHOLD,
+        vix_extreme=VIX_EXTREME_THRESHOLD,
+        trailing_stop=TRAILING_STOP,
+        drawdown_stop=MAX_DRAWDOWN_STOP,
+        transaction_cost_bps=TRANSACTION_COST_BPS,
+        slippage_bps=SLIPPAGE_BPS,
+        rebalance_every=REBALANCE_EVERY,
+        cooldown_bars=COOLDOWN_BARS,
+        signal_method=SIGNAL_METHOD,
+        allow_short=ALLOW_SHORT,
+        max_gross_exposure=MAX_GROSS_EXPOSURE,
+        annual_borrow_cost_bps=ANNUAL_BORROW_COST_BPS,
+        initial_short_margin=INITIAL_SHORT_MARGIN,
+        maintenance_short_margin=MAINTENANCE_SHORT_MARGIN,
+        execution_mode=EXECUTION_MODE,
+        gross_risk_response=GROSS_RISK_RESPONSE,
+        gross_drift_band=GROSS_DRIFT_BAND,
+    )
+    values.update(overrides)
+    return BacktestConfig(**values)
+
+
 def generate_signals(data):
-    """
-    Generate trading signals based on MA energy
-    
-    Args:
-        data: Price data for ETFs
-    
-    Returns:
-        DataFrame with signal strengths for each ETF
-    """
-    signals = pd.DataFrame(0, index=data.index, columns=data.columns)
-    for etf in data.columns:
-        if etf == 'SPY':
-            continue
-        signals[etf] = ma_energy(data[etf], WINDOW)
-    return signals
+    """Causal multi-horizon MA Energy scores for ETF sectors only."""
+    return calculate_signals(data, _strategy_config())
+
 
 def get_target_weights(signals, current_date, current_positions, data, entry_prices):
-    """
-    Calculate target portfolio weights based on signals and risk management rules
-    
-    Args:
-        signals: Signal strengths for ETFs
-        current_date: Current trading date
-        current_positions: Current portfolio positions
-        data: Price data for ETFs
-        entry_prices: Entry prices for current positions
-    
-    Returns:
-        Dictionary of target weights for each ETF
-    """
-    target_weights = {}
-    
-    # Get current VIX level and calculate volatility adjustment
-    vix_level = data.loc[current_date, 'VIX']
-    vol_adj = 1.0
-    
-    if vix_level > VIX_EXTREME_THRESHOLD:
-        # Exit all positions in extreme volatility
-        return target_weights
-    elif vix_level > VIX_HIGH_THRESHOLD:
-        # Reduce position sizes in high volatility
-        vol_adj = 0.5
-    
-    # Calculate dynamic threshold based on market conditions
-    current_threshold = BASE_THRESHOLD
-    
-    # Check stop loss conditions for current positions
-    for etf, shares in current_positions.items():
-        if shares > 0:
-            current_price = data.loc[current_date, etf]
-            entry_price = entry_prices[etf]
-            drawdown = (current_price - entry_price) / entry_price
-            
-            # Apply trailing stop and maximum drawdown stop
-            if drawdown < -MAX_DRAWDOWN_STOP:
-                continue
-    
-    # Find strongest signal above threshold
-    current_signals = signals.loc[current_date]
-    max_signal = current_signals.max()
-    
-    if max_signal > current_threshold:
-        best_etf = current_signals.idxmax()
-        target_weights[best_etf] = 1.0 * vol_adj
-    
-    return target_weights
+    """Legacy informational target; execution/stops are inside backtest()."""
+    return _deterministic_target(
+        signals.loc[current_date], float(data.loc[current_date, "VIX"]),
+        _strategy_config(),
+    )
 
-def backtest(data, signals):
-    """
-    Perform strategy backtest
-    
-    Args:
-        data: Price data for ETFs and VIX
-        signals: Signal strengths for ETFs
-    
-    Returns:
-        DataFrame with portfolio values and returns
-    """
-    portfolio = pd.DataFrame(index=data.index)
-    portfolio['value'] = 0.0
-    portfolio['return'] = 0.0
-    
-    current_positions = {}  # Dictionary to track current positions
-    entry_prices = {}      # Dictionary to track entry prices
-    cash = INITIAL_CAPITAL  # Initial cash
-    
-    # Create positions DataFrame only for ETFs (exclude VIX)
-    etf_columns = [col for col in data.columns if col != 'VIX']
-    positions = pd.DataFrame(0, index=data.index, columns=etf_columns)
-    
-    for i, current_date in enumerate(data.index):
-        if i < MIN_HISTORY:
-            portfolio.loc[current_date, 'value'] = cash
-            continue
-        
-        # Update portfolio value
-        total_value = cash
-        for etf, shares in current_positions.items():
-            total_value += shares * data.loc[current_date, etf]
-        
-        portfolio.loc[current_date, 'value'] = total_value
-        
-        # Calculate returns
-        if i > 0:
-            portfolio.loc[current_date, 'return'] = (
-                portfolio.loc[current_date, 'value'] / 
-                portfolio.loc[data.index[i-1], 'value'] - 1
-            )
-        
-        # Record current positions (only for ETFs)
-        for etf in etf_columns:
-            positions.loc[current_date, etf] = current_positions.get(etf, 0.0)
-        
-        # Get target weights
-        target_weights = get_target_weights(signals, current_date, current_positions, 
-                                          data, entry_prices)
-        
-        # Adjust positions based on target weights
-        for etf, target_weight in target_weights.items():
-            target_value = total_value * target_weight
-            current_price = data.loc[current_date, etf]
-            target_shares = int(target_value / current_price)
-            
-            # Update positions and cash
-            current_positions[etf] = target_shares
-            entry_prices[etf] = current_price
-            
-        # Update cash after all position adjustments
-        cash = total_value - sum(shares * data.loc[current_date, etf] 
-                               for etf, shares in current_positions.items())
-    
-    return portfolio, positions
 
-def rolling_backtest(data, window_years=5):
+def backtest(data, signals=None, **settings):
+    """Trade after signal; portfolio attrs['trades'] contains the audit ledger."""
+    return backtest_strategy(data, signals, _strategy_config(**settings))
+
+
+def rolling_backtest(data, window_years=5, **settings):
+    """Nonoverlapping descriptive windows, not untouched out-of-sample tests.
+
+    Signal warmup and initial capital restart in each window; benchmark uses
+    corresponding SPY adjusted-close series before SPY fees.
     """
-    Perform rolling window backtest with non-overlapping windows
-    
-    Args:
-        data: DataFrame with price data
-        window_years: Length of each window in years
-    """
-    results = []
-    window_days = window_years * 252  # Approximate trading days in a year
-    
-    # Calculate non-overlapping windows
-    start_idx = 0
-    while start_idx + window_days <= len(data):
-        window_data = data.iloc[start_idx:start_idx + window_days]
-        
-        # Run backtest for this window
-        signals = generate_signals(window_data)
-        portfolio, positions = backtest(window_data, signals)
-        
-        # Calculate metrics for this window
-        strategy_return = calculate_annual_return(portfolio['value'])
-        strategy_vol = calculate_annual_volatility(portfolio['return'])
-        strategy_sharpe = calculate_sharpe_ratio(portfolio['return'])
-        strategy_max_dd = calculate_max_drawdown(portfolio['value'])
-        
-        # Calculate benchmark (SPY) metrics
-        spy_returns = window_data['SPY'].pct_change().fillna(0)
-        spy_return = calculate_annual_return(window_data['SPY'])
-        spy_vol = calculate_annual_volatility(spy_returns)
-        spy_sharpe = calculate_sharpe_ratio(spy_returns)
-        spy_max_dd = calculate_max_drawdown(window_data['SPY'])
-        
-        # Calculate average turnover
-        avg_turnover = calculate_average_turnover(portfolio['value'])
-        
-        results.append({
-            'Start Date': window_data.index[0],
-            'End Date': window_data.index[-1],
-            'Window Days': len(window_data),
-            'Strategy Return': strategy_return,
-            'Strategy Volatility': strategy_vol,
-            'Strategy Sharpe': strategy_sharpe,
-            'Strategy Max Drawdown': strategy_max_dd,
-            'SPY Return': spy_return,
-            'SPY Volatility': spy_vol,
-            'SPY Sharpe': spy_sharpe,
-            'SPY Max Drawdown': spy_max_dd,
-            'Average Turnover': avg_turnover
+    if window_years <= 0:
+        raise ValueError("window_years must be positive")
+    window_days = int(window_years * 252)
+    records = []
+    for start in range(0, len(data) - window_days + 1, window_days):
+        window = data.iloc[start:start + window_days]
+        nav, positions = backtest(window, **settings)
+        spy_returns = window["SPY"].pct_change().fillna(0)
+        records.append({
+            "Start Date": window.index[0],
+            "End Date": window.index[-1],
+            "Window Days": len(window),
+            "Strategy Return": calculate_annual_return(nav["value"]),
+            "Strategy Volatility": calculate_annual_volatility(nav["return"]),
+            "Strategy Sharpe": calculate_sharpe_ratio(nav["return"]),
+            "Strategy Max Drawdown": calculate_max_drawdown(nav["value"]),
+            "SPY Return": calculate_annual_return(window["SPY"]),
+            "SPY Volatility": calculate_annual_volatility(spy_returns),
+            "SPY Sharpe": calculate_sharpe_ratio(spy_returns),
+            "SPY Volatility": calculate_annual_volatility(spy_returns),
+            "SPY Max Drawdown": calculate_max_drawdown(window["SPY"]),
+            "Average Turnover": float(nav["turnover"].sum() * 252 / len(window)),
+            "Total Trading Cost": float(nav["transaction_cost"].sum()),
+            "Total Borrow Cost": float(nav["borrow_cost"].sum()),
+            "Trade Count": len(nav.attrs["trades"]),
+            "Max Gross Exposure": float(nav["gross_exposure"].max()),
+            "Short Exposure Days": int((nav["short_exposure"] > 0).sum()),
+            "Margin Breach Days": int(nav["margin_breach"].sum()),
+            "Gross Limit Breach Days": int(nav["gross_limit_breach"].sum()),
+            "Negative Available Cash Days": int((nav["available_cash"] < -1e-6).sum()),
+            "Negative Cash Days": int((nav["cash"] < -1e-7).sum()),
         })
-        
-        # Move to next non-overlapping window
-        start_idx += window_days
-    
-    return pd.DataFrame(results)
+    return pd.DataFrame(records)
+
 
 def calculate_annual_volatility(returns):
     """Calculate annualized volatility"""
@@ -336,9 +254,10 @@ def calculate_annual_return(portfolio_values):
     return annual_return  # Return as decimal, not percentage
 
 def calculate_average_turnover(portfolio_values):
-    """Calculate average portfolio turnover"""
-    daily_change = portfolio_values.pct_change().abs()
-    return daily_change.mean() * 252
+    """Annualized half-gross-notional turnover, computed from actual trades."""
+    if not isinstance(portfolio_values, pd.DataFrame) or "turnover" not in portfolio_values:
+        raise ValueError("Turnover needs the full portfolio with a turnover column")
+    return float(portfolio_values["turnover"].sum() * 252 / len(portfolio_values))
 
 def calculate_sharpe_ratio(returns):
     """
