@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+<title id="title">From account history to risk-constrained trades</title>
+<desc id="desc">Canadian average cost basis or United States tax lots are joined with current prices and target allocations. CVXPY tests trade directions under tracking error and cash constraints and returns trades plus estimated tax, fees, and risk penalties.</desc>
+<rect width="1200" height="320" rx="12" fill="#101a28"/>
+<g font-family="Segoe UI,Arial,sans-serif">
+<text x="48" y="56" font-size="31" font-weight="700" fill="#e7eff8">How the rebalance is calculated</text>
+<g stroke="#345266" stroke-width="1.5" fill="#172839"><rect x="49" y="94" width="304" height="170" rx="9"/><rect x="447" y="94" width="304" height="170" rx="9"/><rect x="845" y="94" width="304" height="170" rx="9"/></g>
+<g font-size="18" fill="#91e3c8" font-weight="700" letter-spacing=".6">
+<text x="71" y="129">INPUTS</text><text x="470" y="129">OPTIMIZER</text><text x="868" y="129">DECISION RECORD</text>
+</g>
+<g font-size="20" fill="#ebf2f8"><text x="71" y="169">ACB pools or tax lots</text><text x="71" y="201">Prices and targets</text><text x="71" y="233">Annual covariance</text>
+<text x="470" y="169">Tax + trading cost</text><text x="470" y="201">Tracking-error cap</text><text x="470" y="233">Cash and position limits</text>
+<text x="868" y="169">Buy / sell / hold</text><text x="868" y="201">Modeled tax and fees</text><text x="868" y="233">Risk and feasibility</text></g>
+<path d="M370 181H427M420 174L427 181L420 188" stroke="#78d8bc" stroke-width="3" stroke-linecap="round" fill="none"/>
+<path d="M768 181H825M818 174L825 181L818 188" stroke="#78d8bc" stroke-width="3" stroke-linecap="round" fill="none"/>
+<text x="49" y="292" font-size="16" fill="#8aa4b7">Continuous-share optimization · Jurisdiction-specific accounting · Explicit solver status</text>
+</g></svg>
