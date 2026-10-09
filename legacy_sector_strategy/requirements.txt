@@ -1,9 +1,0 @@
-streamlit>=1.31.0
-pandas>=2.1.4
-numpy>=1.26.0
-matplotlib>=3.8.2
-yfinance>=0.2.36
-plotly>=5.18.0
-scikit-optimize>=0.9.0
-google-generativeai>=0.3.2
-pytest>=7.4.4

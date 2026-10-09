@@ -1,8 +1,57 @@
-# Tax-Aware Rebalancing Lab
+# TaxRebalance
 
-**Portfolio rebalancing with tax and risk constraints, using simulated accounts.**
+**Tax-aware portfolio rebalancing in Python.**
 
-The project compares rebalancing decisions for simulated taxable accounts. It does not place trades or prepare tax returns. Every purchase, account, price, tax rate, covariance, and portfolio is **simulated**. No personal investment records, brokerage connections, or market feeds are used.
+TaxRebalance accepts prices, target weights, annual covariance matrices, and taxable position histories supplied by the user. It compares modeled tax costs, trading fees, and tracking-error constraints for Canadian average-cost pools and U.S. specific tax lots. The included browser demonstration uses fictional portfolios and precomputed solver results. The package makes no brokerage connections and does not prepare tax returns.
+
+## Install
+
+```bash
+pip install taxrebalance
+```
+
+Python 3.10 or later is required. You can also install from this repository with `pip install -e .`.
+
+## Python interface
+
+```python
+import numpy as np
+from taxrebalance import Portfolio, RebalanceConfig, CanadaACB, rebalance
+
+portfolio = Portfolio.from_transactions(
+    "transactions.csv",
+    prices={"XIC": 100, "XEF": 100},
+    valuation_date="2026-10-08",
+    cash=1000,
+)
+result = rebalance(
+    portfolio,
+    target_weights={"XIC": 0.50, "XEF": 0.50},
+    covariance=np.array([[0.04, 0.01], [0.01, 0.05]]),
+    tax_policy=CanadaACB(marginal_rate=0.42, inclusion_rate=0.50),
+    config=RebalanceConfig(max_tracking_error=0.025, trading_cost_bps=10),
+)
+print(result.summary())
+result.trades_to_csv("trades.csv")
+```
+
+Canadian transactions CSV: `date,ticker,side,shares,price_cad,fee_cad,account`. Date is ISO 8601. The U.S. input is individual tax lots with `lot_id,ticker,shares,basis_per_share,days_held,prior_30d_replacement`. Prices and targets are keyed by ticker; the covariance matrix uses that same ticker order.
+
+The default `tax_aware` method uses a convex relaxation with fixed-direction local search. `risk_only`, `greedy`, and `hold` are also available. `small_exact` enumerates direction patterns for portfolios of up to four assets; it is a benchmark for the continuous-share model. Set `compare=True` to obtain method comparisons. Larger portfolios use the heuristic and require numerical and feasibility checks.
+
+## Command line
+
+```bash
+taxrebalance --jurisdiction CA --portfolio transactions.csv \
+  --prices prices.json --targets targets.json --covariance covariance.json \
+  --valuation-date 2026-10-08 --output decision.json
+```
+
+`--jurisdiction US` accepts a tax-lot CSV and does not require a valuation date. `--config` accepts a JSON object of rebalancing parameters. Results include solver status, trades, costs, and risk measurements.
+
+## Browser demonstration
+
+The demonstration uses synthetic inputs only and does not generate prices or trade instructions for live portfolios.
 
 ## Two tax jurisdictions
 
@@ -15,7 +64,7 @@ The project compares rebalancing decisions for simulated taxable accounts. It do
 | Loss review | Superficial-loss 30-day windows and affiliated-person watch | Simplified wash-sale flags |
 | Presolved scenarios | **6 fictional CAD portfolio cases** | **5 fictional USD cases** |
 
-The [GitHub Pages site](https://garroshub.github.io/Quant_Sector_Rotation_Strategy/) opens with the Canadian portfolio. It shows the modeled cost difference against risk-only rebalancing, the tax, fee and risk contributions to that difference, tracking-error usage, and before/after allocations. Selecting a method updates its exact tax-pool trades and cash balance.
+The [GitHub Pages site](https://garroshub.github.io/taxrebalance/) opens with the Canadian portfolio. It shows the modeled cost difference against risk-only rebalancing, the tax, fee and risk contributions to that difference, tracking-error usage, and before/after allocations. Selecting a method updates its exact tax-pool trades and cash balance.
 
 The site has **four editable assumptions**: annual tracking-error cap (1.2%, 2.5%, 4%), trading fee (5, 10, 40 bps per traded side), usable capital losses (20%, 80%), and the future tax recapture fraction (0%, 20%). Canada also includes a separate simulated account history with an affiliated recent purchase. Each available combination uses its own numerical optimization output.
 
@@ -94,7 +143,6 @@ On a distinct synthetic **US$100,000, four-ETF, ten-lot** portfolio with a 2.5% 
 - tools/test_browser_dashboard.py — runs Chrome/Playwright interaction checks at desktop and mobile widths
 - docs/ — static Canada-first decision desk reading both presolved data files
 - RESEARCH_DESIGN.md — method, scope, legal limitations and research verification
-- legacy_sector_strategy/ — complete preserved older sector trading project, inactive
 
 ## Tax law boundaries
 

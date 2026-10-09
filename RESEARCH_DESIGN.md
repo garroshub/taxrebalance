@@ -1,4 +1,4 @@
-# Research Design — Tax-Aware Rebalancing Lab (Simulation Only)
+# Research Design — TaxRebalance (Simulation Only)
 
 ## Research question
 
@@ -80,7 +80,7 @@ python tools/build_demo_data.py
 python -m http.server 8000 --directory docs
 ```
 
-The 11 complete solved outputs live in docs/data/scenarios.json and are consumed by the static webpage. No AI-generated or fabricated output replaces numerical optimization. Changing a scenario parameter requires re-running the generator. The page defaults to Canada, offering a separate switch to the U.S. model and correct CAD/USD currency.
+The 11 complete solved outputs live in docs/data/scenarios.json and are consumed by the static webpage. Changing a scenario parameter requires re-running the numerical optimizer. The page defaults to Canada, offering a separate switch to the U.S. model and correct CAD/USD currency.
 
 Tests cover Canadian ACB averaging across own fictional accounts, acquisition/sale fees, loss on partial sale, dated ±30-day review windows and remaining-substituted-share screen, affiliate watch, clear avoidance of U.S. elective lot choice, 4-asset feasible optimization, cash/position/TE accounting and the exact small-model comparator. Legacy U.S. regression tests remain separate.
 

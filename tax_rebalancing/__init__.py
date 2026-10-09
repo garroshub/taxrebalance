@@ -1,1 +1,1 @@
-"""Tax-Aware Rebalancing Lab: US tax-lot research decision engine."""
+"""TaxRebalance: US tax-lot research decision engine."""

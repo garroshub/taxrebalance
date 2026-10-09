@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b111c">
   <meta name="description" content="Compare portfolio rebalancing trades, modeled taxes, transaction fees and tracking error in Canadian and U.S. synthetic accounts.">
-  <title>Tax-Aware Rebalancing Lab</title>
+  <title>TaxRebalance</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./pm.css">
 </head>
 <body>
   <div class="site-shell">
     <aside class="sidebar" aria-label="Portfolio scenario controls">
-      <div class="brand"><div class="brand-glyph">T<span>↗</span></div><div><strong>Tax-Aware</strong><small>REBALANCING LAB</small></div></div>
+      <div class="brand"><div class="brand-glyph">T<span>↗</span></div><div><strong>TaxRebalance</strong><small>PORTFOLIO OPTIMIZATION</small></div></div>
       <nav class="side-nav">
         <a href="#overview" class="active">Overview</a>
         <a href="#comparison">Decision comparison</a>
@@ -149,7 +149,7 @@
         <p class="method-warning" id="taxRuleWarning">In Canada, the cost basis of identical securities is averaged. Superficial-loss treatment can depend on purchases within 30 days before or after the sale and on holdings 30 days afterward, including affiliated persons. This simulation flags cases for review but cannot determine the actual tax treatment.</p>
         <div class="method-links"><a id="taxRulesLink" href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/special-rules-other-transactions.html" target="_blank" rel="noopener">CRA: Adjusted cost base ↗</a><a href="https://web.stanford.edu/~boyd/papers/tax_aware_portfolio.html" target="_blank" rel="noopener">Moehle et al., Tax-Aware Portfolio Construction ↗</a></div>
       </section>
-      <footer class="footer"><span>Tax-Aware Rebalancing Lab</span><span>All account histories and solver cases are simulated</span></footer>
+      <footer class="footer"><span>TaxRebalance</span><span>All account histories and solver cases are simulated</span></footer>
     </main>
   </div>
   <script src="./app.js" defer></script>

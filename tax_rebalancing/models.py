@@ -1,4 +1,4 @@
-"""Tax-Aware Rebalancing Lab data contracts.
+"""TaxRebalance data contracts.
 
 US tax-lot research scenario only. No claim of final wash-sale determinations or
 legal tax advice. Dollar-valued cost, tax-benefit, and risk penalties are
