@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "taxrebalance"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tax-aware portfolio rebalancing with Canadian ACB and U.S. tax-lot models"
 readme = "PYPI_README.md"
 requires-python = ">=3.10"

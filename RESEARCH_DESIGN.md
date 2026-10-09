@@ -1,91 +1,84 @@
-# Research Design — TaxRebalance (Simulation Only)
+# Research Design — TaxRebalance
 
-## Research question
+## Problem definition
 
-For a **given target allocation**, can tax-aware trading directions and sales improve modeled after-tax portfolio implementation value over risk-only or greedy rebalancing, without violating tracking error, cash and position constraints? This work is **not a trading strategy**, does not predict returns, and uses **synthetic portfolios only**.
+TaxRebalance selects proposed purchases and sales for a specified target portfolio. It models current realized-gain tax effects, assumed future tax recapture, transaction costs, and deviation from target weights. It does not predict returns or select an investment strategy.
 
-## Two independently defined tax-accounting inputs
+For asset `i`, price `p_i`, target weight `w_i*`, purchase quantity `b_i`, and sale quantity `s_j` from tax lot or ACB pool `j`, let `V` be initial portfolio equity and `Sigma` the annual covariance matrix. Posttrade risky holdings are existing shares plus buys minus sales. Tax pools and allowable sale quantities come from the selected jurisdiction.
 
-### Canadian CAD / average ACB (the default project scenario)
+The objective, expressed in the portfolio currency, is:
 
-All trades are generated in a fictitious Canadian account history. Transactions have date, account label, security, BUY/SELL direction, shares, CAD price and CAD fee. The taxpayer's own holdings of an identical security across its fictional taxable accounts are pooled to compute total adjusted cost base. A purchase increases total ACB by shares × price + purchase fee. A partial sale subtracts **the previous averaged ACB per share × shares sold**, and reports capital gain/loss as sale proceeds less selling fee and that averaged ACB. Partial sales do not change the surviving shares' ACB per unit. Affiliated-person holdings are NOT pooled with the taxpayer's ACB.
-
-The optimizer sees **one ACB pseudo-pool for each ticker**, not selectable U.S.-style purchase lots. Its reported sells have ID ACB-TICKER for audit. The independent tax-rate input is *capital gains inclusion fraction × illustrative marginal income tax rate*. The default simulation assumes **50% × 42% = 21%** as a synthetic marginal realized capital-gain cost proxy. Changes to the Canadian capital gains inclusion proposal were cancelled according to [Finance Canada's 2026 tax expenditure report](https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures/2026/part-2.html). This project deliberately does not implement progressive income taxes, net capital-loss carryback/carryforward computations, year-by-year inclusion-rate adjustments, AMT, provincial filing or foreign currency conversion.
-
-Superficial-loss screening is separate from ACB:
-- A flagged acquisition of identical property by the taxpayer or an affiliated person during the **30 calendar days before** a proposed loss sale causes the optimizer to withhold its immediate *modeled* tax benefit as a conservative approximation.
-- A separate scenario-review function examines **both 30-day sides** and shares of substituted property held on day+30, using synthetic hypothetical future transactions. It returns a potential affected-share count (the minimum of sold, acquired and retained), **not an authoritative Canadian tax-law determination**.
-- Post-sale purchases, related holdings, identity classes, partial-denial rules, RRSP/TFSA-related effects and actual disallowed-loss ACB adjustments are not automatically resolved. A proposed future tax loss benefit may become unavailable, and an affiliated person's ACB is not merged into the taxpayer's cost pool.
-- Sources: [CRA identical properties / ACB](https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/special-rules-other-transactions.html) and [CRA superficial losses](https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/capital-losses-deductions.html).
-
-### U.S. USD / elective tax lots
-
-The existing U.S. model retains a purchase-specific cost basis, holding age, short-/long-term tax assumptions and a limited prior-replacement flag for each fictional tax lot. Its wash-sale screen is incomplete; the U.S. model is **not a tax-lot implementation to be reused in Canada**. See [IRS Publication 550](https://www.irs.gov/publications/p550).
-
-## Shared optimization structure
-
-For security i, let p_i be the simulated price, w_i* the manager-specified target, b_i the buy shares, s_j the number of units sold from simulated U.S. lot j or Canadian averaged pool j, V current modeled portfolio equity, and Sigma the assumed annual covariance.
-
-Posttrade shares = old shares + purchases − sales, and w_i+ = p_i × posttrade shares / V.
-
-The objective is:
-
-    modeled current tax effect
-    + discounted proxy for future recapture
-    + trading fees on total buy and sell notional
-    + risk_aversion × V × (posttrade_weights − target_weights)'
-        × annual_covariance × (posttrade_weights − target_weights)
-
-Constraints are:
-- annualized tracking error at most epsilon
-- sales never exceed existing lots/ACB pools
-- nonnegative stock shares and posttrade cash (no margin financing)
-- a security may BUY, SELL or HOLD on one modeled rebalancing date, but not buy and sell simultaneously
-
-The direction disjunction makes this simplified model **nonconvex**; conditional on directions each problem is convex.
-
-### Algorithm set
-
-1. Hold portfolio, even if not risk-feasible (infeasible cases flagged).
-2. Risk-only: minimize tracking-error penalty and trading costs, measure modeled taxes afterward.
-3. Greedy: preserve risk-only per-security trade quantities and select best U.S. tax lots; for Canada, each ticker has a single average ACB and greedy offers **no tax-lot selection freedom**.
-4. Two-stage heuristic: solve relaxed convex problem (a lower bound), choose buy/sell/hold directions, re-solve with feasible constraints and search one-security direction neighbors.
-5. Small global benchmark: for 4 assets enumerate all 3^4 = 81 direction vectors; solve each convex subproblem. This is a global comparator only for the **continuous-share** toy model to numerical tolerances, not integer trading or legal tax compliance.
-
-Inspired by [Moehle et al., Tax-Aware Portfolio Construction via Convex Optimization](https://web.stanford.edu/~boyd/papers/tax_aware_portfolio.html). Implemented with CVXPY/Clarabel and fallback SCS.
-
-## Synthetic experiment design
-
-### Canada (six solved scenarios)
-
-4 Canadian-listed ETFs (XIC, XEF, XBB, XRE), fictional C$100,000 account, target 25% per sector, synthetic 2024–2025 CAD purchases in fictitious SIM-A and SIM-B taxable accounts, 2026-10-08 simulated valuation date and CAD price C$100 for each. XIC has 200 shares at C$145 and another 200 at C$119, pooled into **400 units at C$132 average ACB**.
-
-Six predetermined cases: 2.5% TE baseline, 1.2% TE strict budget, 4% TE flexible budget, 40bps higher trading fee, 20% usable-loss assumption, and a simulated affiliated person's recent acquisition of identical property.
-
-Base-case model objectives (not refunds): Risk-only **−C$482.99**, Greedy ACB **−C$482.99**, Two-stage heuristic **−C$969.88**, 81-direction global comparator **−C$969.88**. No-trade breaches TE cap.
-
-### U.S. (five solved scenarios)
-
-A different US$100,000 synthetic account with 4 ETFs and 10 elective purchase lots. Cases vary TE, trading fee, loss-use assumptions. Baseline Risk-only +US$149.49, Greedy −US$357.37, heuristic −US$719.48 and enumerated comparator −US$719.48.
-
-**Modeled objective values combine tax assumptions, trading fees and risk penalty, so neither country result is a dollar saving guaranteed to the investor.** The risk penalty weight of 1.0 is deliberately illustrative, not calibrated.
-
-## Tests and reproducibility
-
-Run:
-
-```bash
-python -m unittest -v test_canadian_rebalancing test_tax_rebalancing
-python tools/build_demo_data.py
-python -m http.server 8000 --directory docs
+```text
+estimated current tax effect
++ assumed future tax recapture
++ fees on gross buy and sell notional
++ risk_aversion * V * (posttrade_weights - target_weights)'
+                      * Sigma * (posttrade_weights - target_weights)
 ```
 
-The 11 complete solved outputs live in docs/data/scenarios.json and are consumed by the static webpage. Changing a scenario parameter requires re-running the numerical optimizer. The page defaults to Canada, offering a separate switch to the U.S. model and correct CAD/USD currency.
+Constraints include:
 
-Tests cover Canadian ACB averaging across own fictional accounts, acquisition/sale fees, loss on partial sale, dated ±30-day review windows and remaining-substituted-share screen, affiliate watch, clear avoidance of U.S. elective lot choice, 4-asset feasible optimization, cash/position/TE accounting and the exact small-model comparator. Legacy U.S. regression tests remain separate.
+- Annualized tracking error bounded by `max_tracking_error`.
+- Nonnegative positions, cash, and remaining tax-lot quantities.
+- Available cash after paying transaction fees; no borrowed funds.
+- Buy, sell or hold on each security during one rebalance, not simultaneous purchases and sales.
+- Optional total **two-sided** traded notional divided by initial equity bounded by `max_turnover_fraction`.
+- Optional `restricted_tickers` with no purchases or sales.
+- Fixed provided prices, covariance, tax-rate assumptions and target weights.
 
-## Boundaries and planned simulation-only research
+These are continuous-share optimization decisions. `gross_turnover_fraction` reports total modeled purchases **plus** sales divided by initial portfolio equity.
 
-The prototype omits legally exhaustive wash/superficial-loss rulings, adjusted ACB treatment of a denied loss, actual historical tax returns, option/deemed dispositions, foreign exchange, bid/ask liquidity, real prices, whole-share reconstruction and brokerage execution. **There will be no brokerage or personal investment data connection.**
+## Optimization algorithms
 
-Next evaluations will use **only simulated** portfolios with 20/50/100 securities, randomized ACB and tax basis histories, loss-use rates, compliance-review stress cases, risk budgets and solver runtimes. Compare algorithm gaps, lot/cash infeasibility, trade volume and risk deviation, rather than portfolio CAGR or claimed alpha.
+The direction disjunction introduces nonconvexity. Conditional on a fixed buy/sell/hold vector, the modeled subproblem is convex.
+
+- `hold`: evaluates the current holdings and reports risk breaches.
+- `risk_only`: solves trading costs and risk deviation without using taxes in the optimization objective, then reports modeled tax consequences.
+- `greedy`: keeps risk-only per-security quantities while allocating U.S. sales among lots according to estimated tax cost. Canada has one averaged pool per security and no equivalent lot-choice freedom.
+- `tax_aware`: solves a convex relaxation, fixes a direction vector, and searches feasible one-security direction alternatives.
+- `small_exact`: enumerates all `3**N` directions for at most four assets. This is a global comparator for the modeled continuous-share optimization problem to numerical tolerance, not for integer execution or tax law.
+
+For more than 24 assets, the two optimization heuristics rank candidate direction changes by portfolio drift and relaxed trade magnitude. The default maximum number of fixed-direction candidates decreases with universe size: 25 for up to 100 assets, 17 for 101–250, and 9 above 250. `direction_search_budget` overrides this heuristic budget. The budget does **not** constrain the security universe. A thread-local reusable CVXPY conic model avoids recompiling the full problem for each candidate. Optimization uses Clarabel with an SCS fallback.
+
+The relaxed objective is a numerical **lower bound** for the modeled tax-aware objective. A heuristic result is not guaranteed to attain that bound and is not a global certificate for large universes. Solver statuses, explored direction counts, `search_limited`, feasibility, and the lower-bound value are available in the output.
+
+The optimization follows the convex modeling approach described in [Moehle et al., Tax-Aware Portfolio Construction via Convex Optimization](https://web.stanford.edu/~boyd/papers/tax_aware_portfolio.html).
+
+## Canadian taxable accounts
+
+Dated purchases and sales are grouped by identical security across the taxpayer's own taxable accounts. Purchases add cash purchase value and fees to the total adjusted cost base. Sales recognize proceeds net of sale fees and subtract the current **average** ACB per unit. Partial sales do not change average basis per remaining share. Holdings belonging to affiliated people are not pooled into the taxpayer's ACB.
+
+Canada uses one average ACB pseudo-pool per security for the optimizer, not electable historic U.S. lots. The illustrative effective capital-gain tax proxy is `capital_gain_inclusion_fraction * marginal_tax_rate`, initially 50% × 42% = 21%. That is a scenario input rather than a personalized tax determination. The 2026 federal capital gains inclusion proposal was cancelled, as reported in [Finance Canada's 2026 tax expenditures report](https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures/2026/part-2.html).
+
+A purchase within 30 calendar days before a potential loss sale, including flagged affiliated-person acquisitions, withholds the immediate modeled loss credit conservatively. The separate retrospective quantity screen accepts purchases in the 30 days before and after sale and the remaining substituted shares at day+30. Actual identity, affiliations, denied-loss ACB adjustments, registered accounts and future transactions are not fully adjudicated. See [CRA ACB rules](https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/special-rules-other-transactions.html) and [CRA superficial-loss information](https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/capital-losses-deductions.html).
+
+## United States taxable accounts
+
+Each purchase lot has its own acquisition cost, age, and available share quantity. The model applies illustrative short- and long-term capital-gain tax rates and an assumed loss utilization fraction. A limited prior replacement-purchase flag suppresses modeled immediate loss benefit. This is incomplete wash-sale handling; see [IRS Publication 550](https://www.irs.gov/publications/p550).
+
+## Evidence and reproducibility
+
+The browser demo uses six Canadian and five U.S. synthetic cases. Its 108 stored combinations are independently computed at discrete tracking-error, fee, loss-utilization, and future-recapture settings. The browser is not an optimizer and does not interpolate new decisions.
+
+A separate repeatable large-universe benchmark uses 4 correlated covariance factors, diagonal idiosyncratic variance, heterogeneous securities and tax lots, a 35% gross turnover cap, and one blocked security. On the development Windows computer:
+
+| Assets | Tax lots | Runtime |
+| ---: | ---: | ---: |
+| 250 | 750 | 20.8 seconds |
+| 500 | 1,500 | 58.4 seconds |
+
+These are single synthetic cases and machine-specific wall-clock times. Both met the modeled constraints. Smaller deterministic comparisons at 50 and 100 assets matched the complete one-direction-neighbor search objective under their tested assumptions. Neither comparison proves reliable optimality on other portfolios.
+
+To reproduce:
+
+```bash
+python -m pip install -e ".[test]"
+python -m pytest -q test_canadian_rebalancing.py test_tax_rebalancing.py tests_package/
+python -m tools.benchmark_scale --assets 500 --lots 3 --seed 19
+```
+
+## Implementation boundaries
+
+The package does not reconstruct tradable integer-share orders, enforce lot sizes or minimum notional, model bid/ask spreads, market impact, settlement or broker restrictions, verify live prices, or submit orders. It does not file taxes, evaluate every wash or superficial-loss circumstance, calculate progressive personal tax, determine eligibility for any specific tax refund, or promise financial returns.
+
+The intended use is research and offline decision support with independently validated inputs, sensitivity analysis, and manual review of any resulting trade plan.

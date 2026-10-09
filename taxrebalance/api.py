@@ -120,6 +120,9 @@ class RebalanceConfig:
     loss_utilization: float = 0.80
     future_recapture_fraction: float = 0.20
     risk_aversion: float = 1.0
+    direction_search_budget: int | None = None
+    max_turnover_fraction: float | None = None
+    restricted_tickers: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         items = (self.max_tracking_error, self.trading_cost_bps,
@@ -130,6 +133,15 @@ class RebalanceConfig:
             raise ValueError("Tracking error, trading fees, or risk aversion are invalid")
         if not 0 <= self.loss_utilization <= 1 or not 0 <= self.future_recapture_fraction <= 1:
             raise ValueError("Loss and recapture fractions must be between 0 and 1")
+        if self.direction_search_budget is not None and (
+                isinstance(self.direction_search_budget, bool)
+                or not isinstance(self.direction_search_budget, int)
+                or self.direction_search_budget < 1):
+            raise ValueError("direction_search_budget must be a positive integer")
+        if self.max_turnover_fraction is not None and (
+                not np.isfinite(self.max_turnover_fraction)
+                or not 0 <= self.max_turnover_fraction <= 2):
+            raise ValueError("max_turnover_fraction must be between 0 and 2")
 
 
 @dataclass(frozen=True)
@@ -154,7 +166,8 @@ class RebalanceResult:
         keys = ("feasible", "objective_dollars", "tracking_error",
                 "estimated_tax_current", "estimated_future_recapture",
                 "transaction_cost", "risk_penalty", "post_cash",
-                "solver_status", "violations", "explored_patterns", "relaxed_lower_bound")
+                "solver_status", "violations", "explored_patterns", "relaxed_lower_bound",
+                "gross_turnover_fraction", "search_limited", "search_budget")
         return {"method": self.method, "jurisdiction": self.jurisdiction,
                 "currency": self.currency,
                 **{key: self.decision.get(key) for key in keys},
@@ -230,6 +243,8 @@ def rebalance(
             loss_utilization=config.loss_utilization,
             future_recapture_fraction=config.future_recapture_fraction,
             risk_aversion=config.risk_aversion,
+            max_turnover_fraction=config.max_turnover_fraction,
+            restricted_tickers=tuple(config.restricted_tickers),
         ).to_solver_scenario()
         currency = "CAD"
     elif portfolio.jurisdiction == "US" and isinstance(tax_policy, UnitedStatesLots):
@@ -246,13 +261,16 @@ def rebalance(
             loss_utilization=config.loss_utilization,
             future_recapture_fraction=config.future_recapture_fraction,
             risk_aversion=config.risk_aversion,
+            max_turnover_fraction=config.max_turnover_fraction,
+            restricted_tickers=tuple(config.restricted_tickers),
         )
         currency = "USD"
     else:
         raise ValueError("Tax policy must match CA or US portfolio jurisdiction")
 
     if compare:
-        results = compare_methods(scenario, include_exact=len(tickers) <= 4)
+        results = compare_methods(scenario, include_exact=len(tickers) <= 4,
+                                  max_evaluations=config.direction_search_budget)
         all_methods = tuple(results["methods"])
         internal = {
             "tax_aware": "two_stage_convex_heuristic",
@@ -263,7 +281,12 @@ def rebalance(
         }
         decision = next(x for x in all_methods if x["method"] == internal[method])
     else:
-        decision = METHODS[method](scenario).as_dict()
+        if method in ("tax_aware", "risk_only"):
+            decision = METHODS[method](
+                scenario, max_evaluations=config.direction_search_budget,
+            ).as_dict()
+        else:
+            decision = METHODS[method](scenario).as_dict()
         all_methods = ()
 
     return RebalanceResult(

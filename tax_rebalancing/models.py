@@ -22,7 +22,8 @@ class TaxLot:
     def __post_init__(self):
         if not self.lot_id or not self.ticker:
             raise ValueError("Tax lots need unique identifiers and tickers")
-        if self.shares <= 0 or self.basis_per_share <= 0 or self.days_held < 0:
+        if (not np.isfinite(self.shares) or not np.isfinite(self.basis_per_share)
+                or self.shares <= 0 or self.basis_per_share <= 0 or self.days_held < 0):
             raise ValueError("Tax lot shares/basis must be positive and holding age nonnegative")
 
 @dataclass(frozen=True)
@@ -42,12 +43,17 @@ class Scenario:
     future_recapture_fraction: float = 0.20
     risk_aversion: float = 80.0
     jurisdiction: Literal["US"] = "US"
+    max_turnover_fraction: float | None = None
+    restricted_tickers: tuple[str, ...] = ()
 
     def __post_init__(self):
         n=len(self.tickers)
         prices=np.asarray(self.prices,dtype=float)
         weights=np.asarray(self.target_weights,dtype=float)
         cov=np.asarray(self.annual_covariance,dtype=float)
+        if (not np.all(np.isfinite(prices)) or not np.all(np.isfinite(weights))
+                or not np.all(np.isfinite(cov))):
+            raise ValueError("Portfolio prices, target weights, and covariance must be finite")
         if n<2 or n!=len(set(self.tickers)) or prices.shape!=(n,) or weights.shape!=(n,):
             raise ValueError("At least two distinct assets and aligned price/weight vectors required")
         if np.any(prices<=0) or np.any(weights<0) or abs(weights.sum()-1)>1e-8:
@@ -66,6 +72,12 @@ class Scenario:
             raise ValueError("Tax parameters must lie in [0,1]")
         if self.risk_aversion<0 or self.jurisdiction!="US":
             raise ValueError("Only US tax-lot demonstration with nonnegative risk aversion is supported")
+        if self.max_turnover_fraction is not None and (
+                not np.isfinite(self.max_turnover_fraction)
+                or not 0 <= self.max_turnover_fraction <= 2):
+            raise ValueError("Gross turnover fraction must be within [0,2]")
+        if set(self.restricted_tickers)-set(self.tickers):
+            raise ValueError("Restricted tickers must belong to the portfolio universe")
 
     @property
     def equity(self)->float:

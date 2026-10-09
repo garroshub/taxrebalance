@@ -105,6 +105,8 @@ class CanadianScenario:
     loss_utilization: float = 0.80
     future_recapture_fraction: float = 0.20
     risk_aversion: float = 1.0
+    max_turnover_fraction: float | None = None
+    restricted_tickers: tuple[str, ...] = ()
 
     def __post_init__(self):
         if not self.tickers or set(self.affiliated_recent_purchases)-set(self.tickers):
@@ -160,7 +162,9 @@ class CanadianScenario:
           short_term_tax_rate=effective,long_term_tax_rate=effective,
           loss_utilization=self.loss_utilization,
           future_recapture_fraction=self.future_recapture_fraction,
-          risk_aversion=self.risk_aversion,jurisdiction="US")
+          risk_aversion=self.risk_aversion,jurisdiction="US",
+          max_turnover_fraction=self.max_turnover_fraction,
+          restricted_tickers=self.restricted_tickers)
 
     def solve(self) -> dict:
         solver=self.to_solver_scenario()

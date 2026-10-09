@@ -7,7 +7,9 @@ share model and solver tolerance, not for general tax law or integer lots.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
+from functools import lru_cache
 from itertools import product
+from threading import local
 import cvxpy as cp
 import numpy as np
 from .models import Scenario
@@ -30,10 +32,14 @@ class Decision:
     solver_status: str = ""
     explored_patterns: int = 0
     relaxed_lower_bound: float | None = None
+    search_limited: bool = False
+    search_budget: int | None = None
+    gross_turnover_fraction: float | None = None
 
     def as_dict(self):
         return vars(self).copy()
 
+@lru_cache(maxsize=8)
 def _arrays(s):
     n=len(s.tickers);L=len(s.lots)
     price=np.asarray(s.prices,dtype=float)
@@ -54,15 +60,22 @@ def _arrays(s):
         # Prior related replacement buy: assume loss currently unusable.
     return price,C,incidence,lots,cur,future
 
+
+@lru_cache(maxsize=8)
+def _covariance_root(s):
+    return np.linalg.cholesky(_arrays(s)[1] + 1e-11 * np.eye(len(s.tickers))).T
+
 def evaluate(s,buy,sell,method,status="feasible",patterns=0,lower_bound=None):
     price,C,A,limits,cur,fut=_arrays(s)
     b=np.maximum(0,np.array(buy,dtype=float))
     z=np.maximum(0,np.array(sell,dtype=float))
-    shares=s.shares+b-A@z
+    sold=A@z
+    shares=s.shares+b-sold
     w=shares*price/s.equity
     delta=w-np.array(s.target_weights)
     te=float(np.sqrt(max(0,delta@C@delta)))
     value=float(price@b+(price@A)@z)
+    gross_fraction=value/s.equity
     fees=value*s.trading_cost_bps/10000
     now=float(cur@z); later=float(fut@z)
     risk=float(s.risk_aversion*s.equity*(delta@C@delta))
@@ -72,7 +85,13 @@ def evaluate(s,buy,sell,method,status="feasible",patterns=0,lower_bound=None):
     if cash< -0.002:violations.append("insufficient_cash")
     if min(shares)< -1e-5:violations.append("short_positions")
     if np.any(z>limits+1e-5):violations.append("tax_lot_oversold")
-    if np.any((b>1e-5)&((A@z)>1e-5)):violations.append("same_asset_buy_sell")
+    if np.any((b>1e-5)&(sold>1e-5)):violations.append("same_asset_buy_sell")
+    if (s.max_turnover_fraction is not None and
+            gross_fraction>s.max_turnover_fraction+1e-6):
+        violations.append("gross_turnover_limit")
+    for i,ticker in enumerate(s.tickers):
+        if ticker in s.restricted_tickers and (b[i]>1e-5 or sold[i]>1e-5):
+            violations.append("restricted_asset")
     trades=[]
     for i,ticker in enumerate(s.tickers):
         if b[i]>1e-5:
@@ -103,22 +122,108 @@ def evaluate(s,buy,sell,method,status="feasible",patterns=0,lower_bound=None):
         post_weights=[round(float(x),7) for x in w],
         violations=sorted(set(violations)),solver_status=status,
         explored_patterns=patterns,
-        relaxed_lower_bound=round(float(lower_bound),5) if lower_bound is not None else None)
+        relaxed_lower_bound=round(float(lower_bound),5) if lower_bound is not None else None,
+        gross_turnover_fraction=round(gross_fraction,8))
+
+
+_thread_models = local()
+
+
+def _compiled_large_problem(s,tax_aware):
+    """Keep mutable CVXPY parameters separate for concurrent worker threads."""
+    cache=getattr(_thread_models,"cache",None)
+    if cache is None:
+        cache=lru_cache(maxsize=3)(_build_large_problem)
+        _thread_models.cache=cache
+    return cache(s,tax_aware)
+
+
+def _build_large_problem(s,tax_aware):
+    """Compile a reusable conic model for large fixed-direction searches."""
+    price,C,A,capacity,tax0,tax1=_arrays(s)
+    n=len(price)
+    buys=cp.Variable(n,nonneg=True)
+    sales=cp.Variable(len(capacity),nonneg=True)
+    buy_mask=cp.Parameter(n,nonneg=True)
+    sale_mask=cp.Parameter(len(capacity),nonneg=True)
+    remain=s.shares+buys-A@sales
+    root=_covariance_root(s)
+    delta=cp.multiply(price,remain)/s.equity-np.asarray(s.target_weights)
+    gross=price@buys+(price@A)@sales
+    fees=gross*(s.trading_cost_bps/10000)
+    cash=s.starting_cash+(price@A)@sales-price@buys-fees
+    constraints=[
+        remain>=0,
+        sales<=cp.multiply(capacity,sale_mask),
+        buys<=cp.multiply(s.equity/price,buy_mask),
+        cash>=0,
+        cp.norm(root@delta)<=s.max_tracking_error,
+    ]
+    if s.max_turnover_fraction is not None:
+        constraints.append(gross<=s.max_turnover_fraction*s.equity)
+    estimated_tax=(tax0+tax1)@sales if tax_aware else 0.0
+    problem=cp.Problem(cp.Minimize(
+        s.risk_aversion*s.equity*cp.sum_squares(root@delta)
+        +fees+estimated_tax),constraints)
+    return problem,buys,sales,buy_mask,sale_mask
+
+
+def _solve_large_direction(s,directions,tax_aware):
+    price,C,A,capacity,tax0,tax1=_arrays(s)
+    model,buys,sales,buy_mask,sale_mask=_compiled_large_problem(s,tax_aware)
+    purchase_allowed=np.ones(len(price))
+    sale_allowed=np.ones(len(capacity))
+    if directions is not None:
+        for i,direction in enumerate(directions):
+            if direction!=1:
+                purchase_allowed[i]=0
+            if direction!=-1:
+                sale_allowed[np.flatnonzero(A[i])]=0
+    for ticker in s.restricted_tickers:
+        i=s.tickers.index(ticker)
+        purchase_allowed[i]=0
+        sale_allowed[np.flatnonzero(A[i])]=0
+    buy_mask.value=purchase_allowed
+    sale_mask.value=sale_allowed
+    try:
+        model.solve(solver="CLARABEL",max_iter=250,tol_gap_abs=1e-7,
+                    tol_feas=1e-7,warm_start=True,verbose=False)
+    except (cp.SolverError,ValueError):
+        try:
+            model.solve(solver="SCS",eps=1e-6,max_iters=16000,
+                        warm_start=True,verbose=False)
+        except (cp.SolverError,ValueError):
+            return None
+    if model.status not in ("optimal","optimal_inaccurate"):
+        return None
+    return (np.maximum(np.asarray(buys.value).reshape(-1),0),
+            np.maximum(np.asarray(sales.value).reshape(-1),0),
+            float(model.value))
+
 
 def solve_direction(s,directions=None,tax_aware=True):
     """Buy/sell/hold direction vector fixed, or all relaxed when None."""
+    if len(s.tickers)>24:
+        return _solve_large_direction(s,directions,tax_aware)
     p,C,A,lot_cap,tax0,tax1=_arrays(s)
     n=len(p)
     buys=cp.Variable(n,nonneg=True);sales=cp.Variable(len(lot_cap),nonneg=True)
     remain=s.shares+buys-A@sales
     weight=cp.multiply(p,remain)/s.equity
     diff=weight-np.array(s.target_weights)
-    root=np.linalg.cholesky(C+1e-11*np.eye(n)).T
+    root=_covariance_root(s)
     gross=p@buys+(p@A)@sales
     fees=gross*(s.trading_cost_bps/10000)
     cash=s.starting_cash+(p@A)@sales-p@buys-fees
     cons=[remain>=0,sales<=lot_cap,cash>=0,
           cp.norm(root@diff)<=s.max_tracking_error]
+    if s.max_turnover_fraction is not None:
+        cons.append(gross <= s.max_turnover_fraction*s.equity)
+    for ticker in s.restricted_tickers:
+        i=s.tickers.index(ticker)
+        cons.append(buys[i]==0)
+        for j in np.flatnonzero(A[i]):
+            cons.append(sales[j]==0)
     if directions is not None:
         for i,d in enumerate(directions):
             idx=np.flatnonzero(A[i])
@@ -148,7 +253,8 @@ def _dirs(s,b,z):
     net=b-A@z
     return tuple(1 if x>1e-4 else -1 if x< -1e-4 else 0 for x in net)
 
-def _search(s,choices,method,tax_aware=True,lower_bound=None):
+def _search(s,choices,method,tax_aware=True,lower_bound=None,
+            search_limited=False,search_budget=None):
     best=None;tested=0
     for dirs in choices:
         tested+=1
@@ -161,23 +267,57 @@ def _search(s,choices,method,tax_aware=True,lower_bound=None):
         if best is None or score<best[0]:best=(score,d)
     if best is None:
         return Decision(method,False,solver_status="infeasible",
-                        violations=["no_feasible_direction"],explored_patterns=tested)
+                        violations=["no_feasible_direction"],explored_patterns=tested,
+                        search_limited=search_limited,search_budget=search_budget)
     best[1].explored_patterns=tested
+    best[1].search_limited=search_limited
+    best[1].search_budget=search_budget
     return best[1]
 
-def convex_relaxation_heuristic(s):
+
+def _direction_candidates(s,base,loose,max_evaluations=None):
+    """Prioritize material portfolio drift in large-universe local searches."""
+    n=len(base)
+    total=1+2*n
+    if max_evaluations is None:
+        max_evaluations = None if n<=24 else (25 if n<=100 else 17 if n<=250 else 9)
+    if max_evaluations is not None and (
+            not isinstance(max_evaluations,int) or isinstance(max_evaluations,bool)
+            or max_evaluations<1):
+        raise ValueError("max_evaluations must be a positive integer")
+    if max_evaluations is None or max_evaluations>=total:
+        indices=range(n)
+        budget=None
+    else:
+        price,_,A,_,_,_=_arrays(s)
+        equity=s.equity
+        drift=np.abs(s.initial_weights-np.asarray(s.target_weights))
+        relaxed_net=np.abs(loose[0]-A@loose[1])*price/equity
+        scores=drift+0.25*relaxed_net
+        indices=sorted(range(n),key=lambda i:(-scores[i],i))
+        budget=max_evaluations
+    options=[base]
+    for i in indices:
+        for side in (-1,0,1):
+            if side!=base[i]:
+                q=list(base)
+                q[i]=side
+                options.append(tuple(q))
+                if budget is not None and len(options)>=budget:
+                    return options,True,budget
+    return options,False,budget
+
+
+def convex_relaxation_heuristic(s,max_evaluations=None):
     loose=solve_direction(s,None,tax_aware=True)
     if loose is None:
         return Decision("two_stage_convex_heuristic",False,
               solver_status="relaxation_infeasible",violations=["relaxation"])
     base=_dirs(s,loose[0],loose[1])
-    options=[base]
-    for i in range(len(base)):
-        for side in (-1,0,1):
-            if side!=base[i]:
-                q=list(base);q[i]=side;options.append(tuple(q))
+    options,limited,budget=_direction_candidates(s,base,loose,max_evaluations)
     return _search(s,dict.fromkeys(options),"two_stage_convex_heuristic",
-                   lower_bound=loose[2])
+                   lower_bound=loose[2],search_limited=limited,
+                   search_budget=budget)
 
 def exhaustive_small_benchmark(s):
     if len(s.tickers)>4:
@@ -185,17 +325,15 @@ def exhaustive_small_benchmark(s):
     return _search(s,product((-1,0,1),repeat=len(s.tickers)),
                    "enumerated_global_small_continuous")
 
-def risk_only_rebalance(s):
+def risk_only_rebalance(s,max_evaluations=None):
     loose=solve_direction(s,None,tax_aware=False)
     if loose is None:
         return Decision("risk_only_rebalance",False,
                   solver_status="relaxation_infeasible",violations=["relaxation"])
-    base=_dirs(s,loose[0],loose[1]);options=[base]
-    for i in range(len(base)):
-        for side in (-1,0,1):
-            if side!=base[i]:
-                q=list(base);q[i]=side;options.append(tuple(q))
-    return _search(s,dict.fromkeys(options),"risk_only_rebalance",tax_aware=False)
+    base=_dirs(s,loose[0],loose[1])
+    options,limited,budget=_direction_candidates(s,base,loose,max_evaluations)
+    return _search(s,dict.fromkeys(options),"risk_only_rebalance",tax_aware=False,
+                   search_limited=limited,search_budget=budget)
 
 def greedy_loss_harvest(s):
     """Keep risk-only signed asset trades; sell highest tax-benefit lots first."""
@@ -225,9 +363,9 @@ def greedy_loss_harvest(s):
 def hold_position(s):
     return evaluate(s,np.zeros(len(s.tickers)),np.zeros(len(s.lots)),"hold")
 
-def compare_methods(s,include_exact=True):
-    methods=[hold_position(s),risk_only_rebalance(s),
-             greedy_loss_harvest(s),convex_relaxation_heuristic(s)]
+def compare_methods(s,include_exact=True,max_evaluations=None):
+    methods=[hold_position(s),risk_only_rebalance(s,max_evaluations),
+             greedy_loss_harvest(s),convex_relaxation_heuristic(s,max_evaluations)]
     if include_exact and len(s.tickers)<=4:
         methods.append(exhaustive_small_benchmark(s))
     reference=next((d for d in methods if d.method=="enumerated_global_small_continuous"

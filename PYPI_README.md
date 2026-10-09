@@ -1,60 +1,80 @@
 # TaxRebalance
 
-Tax-aware portfolio rebalancing in Python, with Canadian average adjusted cost base (ACB), U.S. tax-lot accounting, and tracking-error constrained optimization.
+Tax-aware portfolio rebalancing in Python with Canadian average adjusted cost base (ACB), U.S. tax-lot accounting, and tracking-error constrained optimization.
 
-The package accepts user-supplied securities, prices, target weights, covariance matrices, and dated taxable holdings. It produces proposed trades with modeled tax effects, transaction fees, risk penalties, post-trade cash, and solver feasibility diagnostics.
+**Python 3.10+ · CVXPY / Clarabel · Public API and CLI · Scalable local search**
 
-**Python 3.10+ · CVXPY and Clarabel · CAD and USD research models**
+The Python optimizer supports portfolios larger than the four-ETF website example. Synthetic tests have covered **500 securities with 1,500 individual tax lots**, correlated annual covariance, gross turnover limits, and restricted securities. The large-universe solver uses bounded local search with a reusable conic model; results are not globally optimality-certified.
 
 ## Install
 
 ```bash
-pip install taxrebalance
+python -m pip install taxrebalance
 ```
 
-## Quickstart
+## Example
 
 ```python
-from datetime import date
-from taxrebalance import (
-    CADTransaction, CanadaACB, Portfolio, RebalanceConfig, rebalance
-)
+import json
+from taxrebalance import Portfolio, RebalanceConfig, UnitedStatesLots, rebalance
 
-portfolio = Portfolio(
-    jurisdiction="CA",
-    prices={"XIC": 100.0, "XEF": 100.0},
-    transactions=(
-        CADTransaction(date(2025, 1, 10), "XIC", "BUY", 60, 115),
-        CADTransaction(date(2025, 2, 12), "XEF", "BUY", 40, 85),
-    ),
-    valuation_date=date(2026, 10, 8),
+with open("prices.json", encoding="utf-8") as f:
+    prices = json.load(f)
+with open("targets.json", encoding="utf-8") as f:
+    targets = json.load(f)
+with open("covariance.json", encoding="utf-8") as f:
+    covariance = json.load(f)
+
+portfolio = Portfolio.from_tax_lots(
+    "tax_lots.csv", prices=prices, cash=5000
 )
 result = rebalance(
     portfolio,
-    target_weights={"XIC": 0.50, "XEF": 0.50},
-    covariance=[[0.04, 0.01], [0.01, 0.04]],
-    tax_policy=CanadaACB(marginal_rate=0.42, inclusion_rate=0.50),
-    config=RebalanceConfig(max_tracking_error=0.015),
+    target_weights=targets,
+    covariance=covariance,
+    tax_policy=UnitedStatesLots(),
+    config=RebalanceConfig(
+        max_tracking_error=0.025,
+        trading_cost_bps=10,
+        max_turnover_fraction=0.20,
+        direction_search_budget=25,
+    ),
 )
 print(result.summary())
-print(result.trades)
+result.trades_to_csv("proposed_trades.csv")
 ```
 
-The default `tax_aware` method uses a convex relaxation and local fixed-direction search. The package also supports `risk_only`, `greedy`, `hold`, and `small_exact`. Exhaustive direction enumeration applies to at most four securities in the continuous-share model.
+`max_turnover_fraction` caps the **combined** buy and sell notional relative to starting equity. Set `restricted_tickers=("SYMBOL",)` in `RebalanceConfig` to prohibit trades in a security included in the portfolio universe. Additional parameters include risk aversion, usable capital loss fraction, and assumed future tax recapture.
 
-## Inputs and results
+Canadian portfolios use dated `CADTransaction` events or `Portfolio.from_transactions()`, and `CanadaACB` as the tax policy. United States portfolios use individual `TaxLot` entries and `UnitedStatesLots`.
 
-- **Canada:** dated purchase and sale transactions, aggregated into average ACB pools for identical securities across the taxpayer's own taxable accounts.
-- **United States:** individual tax lots with acquisition basis, holding period, and limited replacement-purchase flags.
-- **Constraints:** target weights, annual tracking-error cap, transaction fees, cash availability, nonnegative holdings, and sale quantities.
-- **Results:** per-security trades, modeled current and future tax effects, estimated trading fees, risk penalties, solver status, and risk feasibility.
-- **Interfaces:** Python API, CSV and JSON inputs, JSON results, CSV trade export, and a command-line entry point.
+## Main features
 
-This is a continuous-share decision model. Tax-loss eligibility, superficial-loss and wash-sale treatment, and future transactions require review outside the package. No live market feed, trading execution, tax-return filing, or return forecast is provided.
+- Custom portfolio universes, holding histories, current prices, target weights and covariance inputs.
+- Canadian averaged ACB pools and U.S. lot-specific sale options.
+- Convex-relaxation tax-aware optimizer with adaptive direction search on larger portfolios.
+- Maximum tracking error, available cash, nonnegative holdings, gross turnover limits and blocked securities.
+- Hold, risk-only and greedy comparison methods. Enumeration of all directions is available for at most four assets as a **small-model benchmark**, not as the maximum package universe size.
+- JSON result export, CSV trade export, feasibility flags, turnover accounting, solver status and bounded-search diagnostics.
+- A CLI reading CSV tax lots or transactions, plus JSON risk and target inputs.
 
-## Links
+## Measured scale
 
-- Repository and complete documentation: https://github.com/garroshub/taxrebalance
-- Interactive synthetic portfolio demo: https://garroshub.github.io/taxrebalance/
+In a synthetic U.S. study with four-factor correlated covariance and 35% two-sided gross turnover:
+
+| Securities | Tax lots | Observed runtime |
+| ---: | ---: | ---: |
+| 250 | 750 | 20.8 seconds |
+| 500 | 1,500 | 58.4 seconds |
+
+These are single-run development-machine timings. Reproduce the workload using `python tools/benchmark_scale.py --assets 500 --lots 3` after cloning the repository. Runtime and trade quality depend on input structure and solver hardware.
+
+## Scope
+
+This is a **single-period, continuous-share decision model**, not executable trade routing. It omits whole-share reconstruction, minimum order values, bid/ask spreads, real-world market impact and brokerage integration. Canadian superficial-loss and U.S. wash-sale handling remain conservative, incomplete screening logic. It does not prepare tax returns, determine legal tax-loss eligibility or predict financial returns. User-supplied prices, covariance and tax parameters must be validated independently.
+
+Repository: https://github.com/garroshub/taxrebalance
+
+Interactive synthetic demo: https://garroshub.github.io/taxrebalance/
 
 MIT License.
