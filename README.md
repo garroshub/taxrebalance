@@ -155,4 +155,10 @@ Neither tax engine computes a completed tax return. The Canadian model does not 
 
 </details>
 
+## Related quant tools
+
+Companion tools from the same open-source quant family:
+
+- **[Portfolio Risk Lab](https://github.com/garroshub/portfolio-risk-lab)** — uncertainty-aware portfolio optimization that compares allocations when risk models disagree, with an interactive decision workspace.
+- **[Option Risk Explain](https://github.com/garroshub/OptionRiskExplain)** — equity-option P&L attribution that reconciles daily P&L against opening Greeks and flags contracts that need review.
 MIT License.
